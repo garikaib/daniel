@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-ink: #0f172a;
+  --color-paper: #f8fafc;
+  --color-accent: #0e7a3d;
+  
+  /* Brand Colors from Ansari Style Reference */
+  --color-brand-blue: #030F26;
+  --color-brand-pink: #FF365E;
+  --color-brand-orange: #F9A03F;
+  --color-brand-plum: #421226; /* Dark plum purple strip */
+  --color-brand-sand: #F7F2ED;
+  
+  /* Custom Fonts */
+  --font-sans: "Red Hat Display", sans-serif;
+  --font-serif: "Aleo", serif;
+}
+
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #030F26;
+}
+
+.dark {
+  --bg-primary: #0b0f19;
+  --text-primary: #f4f4f5;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

@@ -1,0 +1,18 @@
+# Track only the custom theme and plugin; ignore everything else at the
+# site root (WordPress core, config, content, build tooling, etc.).
+/*
+!/wp-content/
+/wp-content/*
+!/wp-content/themes/
+/wp-content/themes/*
+!/wp-content/themes/molokele/
+!/wp-content/plugins/
+/wp-content/plugins/*
+!/wp-content/plugins/molokele-tools/
+
+# Build artifacts / local junk inside the tracked dirs
+wp-content/themes/molokele/dist/
+wp-content/themes/molokele/node_modules/
+wp-content/plugins/molokele-tools/dist/
+wp-content/plugins/molokele-tools/node_modules/
+.DS_Store
