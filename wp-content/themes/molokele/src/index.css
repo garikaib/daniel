@@ -38,3 +38,38 @@ body {
   font-family: var(--font-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Ensure the header template part and root container are sticky */
+header.wp-block-template-part,
+.wp-block-template-part-header,
+#molokele-header-root {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+}
+
+.molokele-contact-bg {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-brand-plum);
+}
+@media (min-width: 768px) {
+  .molokele-contact-bg {
+    left: 20%;
+    right: 0;
+    clip-path: polygon(40px 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+@media (min-width: 1024px) {
+  .molokele-contact-bg {
+    left: 25%;
+  }
+}
+@media (min-width: 1280px) {
+  .molokele-contact-bg {
+    left: 30%;
+  }
+}
+
+

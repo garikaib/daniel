@@ -51,39 +51,37 @@ export default function Home() {
           backgroundImage: "url('/wp-content/themes/molokele/images/home_hon_molokele_official.jpg')"
         }}
       >
-        {/* Dark overlay for contrast */}
-        <div className="absolute inset-0 bg-brand-blue/30 backdrop-brightness-75 z-0" />
-        
+        {/* Dark gradient overlay for contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/80 via-brand-blue/50 to-brand-blue/10 z-0" />
+
         {/* Hero Content Wrapper */}
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full z-10 text-white">
           <div className="max-w-2xl md:ml-8">
-            
+
             {/* Top Tagline */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <span className="font-sans font-black text-xs sm:text-sm tracking-widest uppercase text-white">
                 Member of Parliament
               </span>
               <span className="h-2 w-2 rounded-full bg-brand-pink" />
             </div>
 
-            {/* Overlapping Cursive/Sans Name Branding */}
-            <div className="relative inline-block mb-4 pt-10">
-              {/* Cursive Overlap Signature */}
-              <span className="absolute top-[-25px] left-0 font-signature text-8xl sm:text-9xl text-brand-pink leading-none transform -rotate-12 pointer-events-none select-none drop-shadow-md">
-                Daniel
+            {/* Name Branding */}
+            <div className="mb-2">
+              {/* Cursive Signature */}
+              <span className="block font-signature text-7xl sm:text-8xl md:text-9xl text-brand-pink leading-[0.75] -mb-3 sm:-mb-5 md:-mb-7 pl-1 select-none drop-shadow-md">
+                Molokele
               </span>
               {/* Bold Sans Surname */}
               <h1 className="font-sans font-black text-6xl sm:text-8xl md:text-9xl text-white tracking-tighter uppercase leading-none select-none">
-                Molokele
+                Daniel
               </h1>
             </div>
 
             {/* Representation Subtitle */}
-            <div className="flex items-center gap-3 mt-6">
-              <p className="font-sans font-black text-xs sm:text-sm md:text-base tracking-widest uppercase text-white bg-brand-plum/40 px-3 py-1.5 rounded-sm inline-block">
-                Representing Hwange Central Constituency
-              </p>
-            </div>
+            <p className="mt-4 font-serif text-base sm:text-lg md:text-xl tracking-[0.15em] uppercase text-white drop-shadow-md">
+              Representing Hwange Central Constituency
+            </p>
 
           </div>
         </div>
