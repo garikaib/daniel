@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Alex+Brush&family=Mrs+Saint+Delafield&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -8,27 +8,28 @@
   --color-paper: #f8fafc;
   --color-accent: #0e7a3d;
   
-  /* Brand Colors from Ansari Style Reference */
-  --color-brand-blue: #030F26;
-  --color-brand-pink: #FF365E;
-  --color-brand-orange: #F9A03F;
-  --color-brand-plum: #421226; /* Dark plum purple strip */
-  --color-brand-sand: #F7F2ED;
+  /* Brand Colors — Zimbabwe Flag Palette (mapped to retain class compatibility) */
+  --color-brand-blue: #0D0D0D;   /* charcoal black */
+  --color-brand-pink: #C8102E;   /* flag red */
+  --color-brand-orange: #DCA11D; /* flag gold */
+  --color-brand-plum: #095228;   /* flag green — backgrounds, borders, large fills */
+  --color-brand-plum-light: #3FBF72; /* brighter flag-green for text/icons on dark backgrounds (brand-plum only has ~2:1 contrast on black, fails WCAG) */
+  --color-brand-sand: #FAF9F5;   /* flag alabaster white */
   
   /* Custom Fonts */
   --font-sans: "Red Hat Display", sans-serif;
   --font-serif: "Aleo", serif;
-  --font-signature: "Mrs Saint Delafield", cursive;
-  --font-script: "Alex Brush", cursive;
+  --font-signature: "Cormorant Garamond", serif;
+  --font-script: "Cormorant Garamond", serif;
 }
 
 :root {
   --bg-primary: #ffffff;
-  --text-primary: #030F26;
+  --text-primary: #0A0A0A;
 }
 
 .dark {
-  --bg-primary: #0b0f19;
+  --bg-primary: #090D14;
   --text-primary: #f4f4f5;
 }
 
@@ -39,7 +40,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Ensure the header template part and root container are sticky */
+/* Ensure the header template part and root container are sticky with zero margin gap */
 header.wp-block-template-part,
 .wp-block-template-part-header,
 #molokele-header-root {
@@ -47,29 +48,285 @@ header.wp-block-template-part,
   top: 0;
   z-index: 50;
   width: 100%;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Zero out WordPress FSE block layout margins between header and content */
+.wp-site-blocks > *,
+.wp-site-blocks > * + *,
+main.wp-block-group,
+.molokele-app,
+#molokele-root {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+body .is-layout-flow > * + * {
+  margin-block-start: 0 !important;
 }
 
 .molokele-contact-bg {
   position: absolute;
   inset: 0;
-  background-color: var(--color-brand-plum);
+  background: #044D29;
+  border-top: 1px solid rgba(220, 161, 29, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-@media (min-width: 768px) {
-  .molokele-contact-bg {
-    left: 20%;
-    right: 0;
-    clip-path: polygon(40px 0, 100% 0, 100% 100%, 0 100%);
-  }
+
+/* Hero name-branding entrance sequence */
+@keyframes molokele-fade-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@media (min-width: 1024px) {
-  .molokele-contact-bg {
-    left: 25%;
-  }
+
+@keyframes molokele-type-wipe {
+  from { clip-path: inset(-100% 100% -100% 0); }
+  to   { clip-path: inset(-100% 0 -100% 0); }
 }
-@media (min-width: 1280px) {
-  .molokele-contact-bg {
-    left: 30%;
+
+@keyframes molokele-ink-fill {
+  from { color: transparent; -webkit-text-stroke: 2px var(--ink-color, white); }
+  to   { color: var(--ink-color, white); -webkit-text-stroke: 0px transparent; }
+}
+
+/* Same fill, but leaves a thin matching-colour stroke behind — reads bolder */
+@keyframes molokele-ink-fill-bold {
+  from { color: transparent; -webkit-text-stroke: 2px var(--ink-color, white); }
+  to   { color: var(--ink-color, white); -webkit-text-stroke: 1px var(--ink-color, white); }
+}
+
+@keyframes molokele-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Home hero slider progress bar — width climbs over the slide's dwell time.
+   Duration is set inline per-slide (matches SLIDE_DURATION in Home.jsx). */
+@keyframes molokele-hero-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.animate-molokele-hero-progress {
+  animation-name: molokele-hero-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.molokele-anim-tagline {
+  opacity: 0;
+  animation: molokele-fade-down 0.6s ease-out 0.1s forwards;
+}
+
+/* Shared "typed outline, then inked solid" mechanics */
+.molokele-anim-type {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink-color, white);
+  clip-path: inset(-100% 100% -100% 0);
+}
+
+.molokele-anim-type-signature {
+  --ink-color: var(--color-brand-pink);
+  animation:
+    molokele-type-wipe 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.3s forwards,
+    molokele-ink-fill 0.7s ease-out 1.1s forwards;
+}
+
+.molokele-anim-type-daniel {
+  --ink-color: var(--color-brand-orange);
+  animation:
+    molokele-type-wipe 1.1s cubic-bezier(0.65, 0, 0.35, 1) 1.3s forwards,
+    molokele-ink-fill-bold 0.7s ease-out 2.1s forwards;
+}
+
+.molokele-anim-subtitle {
+  opacity: 0;
+  animation: molokele-fade-in 0.8s ease-out 2.8s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .molokele-anim-tagline,
+  .molokele-anim-type,
+  .molokele-anim-type-signature,
+  .molokele-anim-type-daniel,
+  .molokele-anim-subtitle {
+    animation: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+    color: var(--ink-color, white) !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
   }
 }
 
+/* Quick-links card grid — staggered scroll-in reveal */
+.molokele-card-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.molokele-card-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .molokele-card-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Button design system components — Parliament Flag Theme */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem; /* rounded-md */
+  background-color: #044D29;
+  padding: 0.875rem 1.75rem;
+  font-family: var(--font-sans);
+  font-weight: 900; /* font-black */
+  font-size: 0.75rem; /* text-xs */
+  letter-spacing: 0.2em; /* tracking-[0.2em] */
+  text-transform: uppercase;
+  color: #ffffff;
+  border: 1px solid rgba(220, 161, 29, 0.4);
+  box-shadow: 0 4px 12px rgba(4, 77, 41, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #03381e;
+  color: #DCA11D;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(4, 77, 41, 0.3);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
+  border: 2px solid #044D29;
+  background-color: #ffffff;
+  padding: 0.875rem 1.75rem;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #044D29;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #044D29;
+  border-color: #044D29;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Dark mode variations for secondary button */
+.dark .btn-secondary {
+  border-color: rgba(220, 161, 29, 0.5);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #044D29;
+  border-color: #DCA11D;
+  color: #DCA11D;
+}
+
+.dark .btn-primary:hover,
+.dark .btn-accent:hover {
+  background-color: #03381e;
+  color: #DCA11D;
+}
+
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.75rem;
+  background-color: var(--color-brand-orange);
+  padding: 1rem 2rem;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-brand-blue); /* dark text on gold background has excellent contrast */
+  box-shadow: 0 10px 15px -3px rgba(220, 161, 29, 0.1), 0 4px 6px -4px rgba(220, 161, 29, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-accent:hover {
+  background-color: var(--color-brand-blue);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(13, 13, 13, 0.2), 0 4px 6px -4px rgba(13, 13, 13, 0.2);
+}
+
+/* Eliminate browser/parent theme focus outline boxes on mouse click, keeping outlines for keyboard tab users */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove default blue tap highlight boxes on mobile touch screens */
+button,
+a,
+input,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Override WordPress FSE / Gutenberg parent theme link color inheritance on button links & styled elements */
+body a.btn-primary,
+body a.btn-primary:visited,
+body .btn-primary a,
+body .btn-primary span {
+  color: #ffffff !important;
+}
+
+body a.btn-primary:hover,
+body a.btn-primary:hover span {
+  color: #DCA11D !important;
+}
+
+body a.btn-secondary,
+body a.btn-secondary:visited {
+  color: #044D29 !important;
+}
+
+body a.btn-secondary:hover {
+  color: #ffffff !important;
+}
+
+/* Ensure links with .text-white or !text-white override parent theme a color rules in light mode */
+body a.text-white,
+body a.text-white *,
+body a.\!text-white,
+body a.\!text-white * {
+  color: #ffffff !important;
+}
 

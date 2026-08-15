@@ -136,3 +136,173 @@ add_filter(
 	10,
 	3
 );
+
+/**
+ * Register REST API routes for settings.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'molokele/v1',
+			'/settings',
+			array(
+				// Public: the front end (visited by anonymous site visitors) reads
+				// these to render the gallery — only saving requires admin rights.
+				'methods'             => 'GET',
+				'callback'            => 'molokele_tools_get_settings',
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'molokele/v1',
+			'/settings',
+			array(
+				'methods'             => 'POST',
+				'callback'            => 'molokele_tools_save_settings',
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
+	}
+);
+
+function molokele_tools_get_settings() {
+	$default_settings = array(
+		'columns'         => '3',
+		'shadow'          => 'shadow-md',
+		'border_radius'   => 'rounded-sm',
+		'autoplay'        => false,
+		'autoplay_speed'  => '3000',
+		'backdrop_blur'   => 'backdrop-blur-md',
+	);
+
+	$settings = get_option( 'molokele_gallery_settings', $default_settings );
+	return rest_ensure_response( $settings );
+}
+
+function molokele_tools_save_settings( $request ) {
+	$params = $request->get_json_params();
+	update_option( 'molokele_gallery_settings', $params );
+	return rest_ensure_response( array( 'success' => true ) );
+}
+
+/**
+ * Register REST API routes for the homepage hero slider.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'molokele/v1',
+			'/hero-slides',
+			array(
+				// Public: the homepage hero reads these to render the slider —
+				// only saving requires admin rights.
+				'methods'             => 'GET',
+				'callback'            => 'molokele_tools_get_hero_slides',
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'molokele/v1',
+			'/hero-slides',
+			array(
+				'methods'             => 'POST',
+				'callback'            => 'molokele_tools_save_hero_slides',
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
+	}
+);
+
+/**
+ * Ships with three real slides so the hero never appears broken before
+ * anyone has touched the admin screen — same seeding pattern as gallery
+ * settings above.
+ */
+function molokele_tools_default_hero_slides() {
+	return array(
+		array(
+			'id'          => 'slide-1',
+			'image'       => '',
+			'image_id'    => 0,
+			'position'    => 'bg-top',
+			'badge'       => 'Legislative Leadership',
+			'title'       => 'Parliamentary Action',
+			'description' => "Advocating for Whange Central in the National Assembly through key debates and workers' rights legislation.",
+			'cta_label'   => 'CDF Tracker',
+			'cta_url'     => '/cdf-tracker/',
+		),
+		array(
+			'id'          => 'slide-2',
+			'image'       => '',
+			'image_id'    => 0,
+			'position'    => 'bg-center',
+			'badge'       => 'Constituency Growth',
+			'title'       => 'Community Empowerment',
+			'description' => 'Auditing developments and overseeing local projects through transparent CDF initiatives.',
+			'cta_label'   => 'Audit Map',
+			'cta_url'     => '/cdf-tracker/',
+		),
+		array(
+			'id'          => 'slide-3',
+			'image'       => '',
+			'image_id'    => 0,
+			'position'    => 'bg-center',
+			'badge'       => 'Leadership Legacy',
+			'title'       => 'A Vision for Whange',
+			'description' => 'Championing mining and environmental protection policies to safeguard community livelihoods.',
+			'cta_label'   => 'Read Biography',
+			'cta_url'     => '/biography/',
+		),
+	);
+}
+
+function molokele_tools_get_hero_slides() {
+	$slides = get_option( 'molokele_hero_slides', null );
+	if ( ! is_array( $slides ) || empty( $slides ) ) {
+		$slides = molokele_tools_default_hero_slides();
+	}
+	return rest_ensure_response( $slides );
+}
+
+function molokele_tools_save_hero_slides( $request ) {
+	$params = $request->get_json_params();
+	if ( ! is_array( $params ) ) {
+		return new WP_Error( 'molokele_invalid_slides', 'Expected an array of slides.', array( 'status' => 400 ) );
+	}
+
+	$clean = array();
+	foreach ( $params as $slide ) {
+		if ( ! is_array( $slide ) ) {
+			continue;
+		}
+		$clean[] = array(
+			'id'          => sanitize_text_field( $slide['id'] ?? uniqid( 'slide-' ) ),
+			'image'       => esc_url_raw( $slide['image'] ?? '' ),
+			'image_id'    => absint( $slide['image_id'] ?? 0 ),
+			'position'    => in_array( $slide['position'] ?? '', array( 'bg-top', 'bg-center', 'bg-bottom' ), true )
+				? $slide['position']
+				: 'bg-center',
+			'badge'       => sanitize_text_field( $slide['badge'] ?? '' ),
+			'title'       => sanitize_text_field( $slide['title'] ?? '' ),
+			'description' => sanitize_textarea_field( $slide['description'] ?? '' ),
+			'cta_label'   => sanitize_text_field( $slide['cta_label'] ?? '' ),
+			'cta_url'     => esc_url_raw( $slide['cta_url'] ?? '' ),
+		);
+	}
+
+	update_option( 'molokele_hero_slides', $clean );
+	return rest_ensure_response(
+		array(
+			'success' => true,
+			'slides'  => $clean,
+		)
+	);
+}
