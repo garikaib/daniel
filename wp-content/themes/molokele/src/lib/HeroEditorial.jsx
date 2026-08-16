@@ -29,22 +29,34 @@ export default function HeroEditorial({
   goToSlide,
   slideImage,
 }) {
-  // Dock "flyout" magnification — thumbnails scale and lift toward the
-  // cursor's x-position, proportional to proximity, then relax back to a
-  // flat row once the pointer leaves the dock.
+  // Dock "flyout" magnification — a wide falloff radius means several
+  // neighbouring thumbnails react at once (a wave, not just the one under
+  // the pointer), each blown up, lifted, fanned out with a slight rotation
+  // away from the cursor, and popped in front with a spring/overshoot
+  // easing. Relaxes back to a flat row once the pointer leaves the dock.
   const thumbRefs = useRef([]);
   const [dockMouseX, setDockMouseX] = useState(null);
 
-  const thumbTransform = (i) => {
+  const thumbMetrics = (i) => {
     const el = thumbRefs.current[i];
-    if (dockMouseX == null || !el) return 'scale(1) translateY(0px)';
+    if (dockMouseX == null || !el) {
+      return { transform: 'translateY(0px) scale(1) rotate(0deg)', zIndex: 1, dropShadow: 'none', eased: 0 };
+    }
     const rect = el.getBoundingClientRect();
     const center = rect.left + rect.width / 2;
-    const distance = Math.abs(dockMouseX - center);
-    const proximity = Math.max(0, 1 - distance / 90);
-    const scale = 1 + proximity * 0.55;
-    const lift = proximity * 14;
-    return `scale(${scale.toFixed(3)}) translateY(-${lift.toFixed(1)}px)`;
+    const distance = dockMouseX - center;
+    const radius = 150;
+    const proximity = Math.max(0, 1 - Math.abs(distance) / radius);
+    const eased = proximity * proximity;
+    const scale = 1 + eased * 2.4;
+    const lift = eased * 64;
+    const rotate = -Math.sign(distance) * eased * 14;
+    return {
+      transform: `translateY(-${lift.toFixed(1)}px) scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(1)}deg)`,
+      zIndex: Math.round(1 + eased * 40),
+      dropShadow: eased > 0.08 ? `drop-shadow(0 ${(20 + eased * 30).toFixed(0)}px ${(20 + eased * 20).toFixed(0)}px rgba(0,0,0,${(0.5 + eased * 0.3).toFixed(2)}))` : 'none',
+      eased,
+    };
   };
 
   return (
@@ -205,27 +217,43 @@ export default function HeroEditorial({
             <div className="hidden lg:flex items-end gap-2">
               {slides.map((slide, i) => {
                 const isActive = i === currentSlide;
+                const { transform, zIndex, dropShadow, eased } = thumbMetrics(i);
+                const revealed = isActive || eased > 0.12;
+                // Tailwind's grayscale/drop-shadow utilities and this inline
+                // transform both compile to the `filter` property — combine
+                // them by hand here so the inline style doesn't clobber the
+                // class (last one wins, and inline always wins over classes).
+                const filterValue = revealed
+                  ? (dropShadow !== 'none' ? dropShadow : '')
+                  : 'grayscale(1)';
                 return (
                   <button
                     key={slide.id || i}
                     ref={(el) => (thumbRefs.current[i] = el)}
                     onClick={() => goToSlide(i)}
                     aria-label={`Go to slide ${i + 1}: ${slide.title}`}
-                    title={slide.title}
-                    style={{ transform: thumbTransform(i), transformOrigin: 'bottom center' }}
-                    className={`relative overflow-hidden rounded-lg w-11 h-9 transition-[transform,opacity,filter] duration-200 ease-out ${
-                      isActive ? 'ring-2 ring-[#DCA11D] opacity-100' : 'opacity-45 grayscale hover:opacity-90 hover:grayscale-0'
-                    }`}
+                    style={{ transform, zIndex, filter: filterValue, transformOrigin: 'bottom center' }}
+                    className={`relative overflow-visible rounded-lg w-12 h-10 transition-[transform,filter,opacity] duration-[280ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                      isActive ? 'ring-2 ring-[#DCA11D]' : ''
+                    } ${revealed ? 'opacity-100' : 'opacity-45'}`}
                   >
-                    <img
-                      src={slideImage(slide, i)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                    {isActive && (
-                      <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
-                    )}
+                    <span
+                      className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#DCA11D]/40 bg-[#090D14] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-[#DCA11D] shadow-lg transition-opacity duration-150"
+                      style={{ opacity: eased > 0.4 ? 1 : 0 }}
+                    >
+                      {slide.title}
+                    </span>
+                    <span className="relative block h-full w-full overflow-hidden rounded-lg">
+                      <img
+                        src={slideImage(slide, i)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      {isActive && (
+                        <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
+                      )}
+                    </span>
                   </button>
                 );
               })}
