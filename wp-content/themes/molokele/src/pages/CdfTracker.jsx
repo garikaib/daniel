@@ -183,9 +183,9 @@ const STATUS_STYLES = {
   completed: { label: 'Completed', badge: 'bg-[#044D29] text-white border border-[#DCA11D]/30', border: 'border-l-[#044D29]', bar: 'bg-[#044D29]', icon: CheckCircle2 },
   live: { label: 'Live Now', badge: 'bg-[#C8102E] text-white font-black animate-pulse', border: 'border-l-[#C8102E]', bar: 'bg-[#C8102E]', icon: MessageSquare },
   today: { label: 'Today', badge: 'bg-[#DCA11D] text-[#090D14] font-black', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: Bell },
-  upcoming: { label: 'Upcoming', badge: 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white', border: 'border-l-slate-300 dark:border-l-white/20', bar: 'bg-slate-300 dark:bg-white/20', icon: Calendar },
-  cancelled: { label: 'Cancelled', badge: 'bg-slate-500 text-white line-through decoration-2', border: 'border-l-slate-500', bar: 'bg-slate-500', icon: X },
-  postponed: { label: 'Postponed', badge: 'bg-amber-500 text-white font-black', border: 'border-l-amber-500', bar: 'bg-amber-500', icon: AlertCircle },
+  upcoming: { label: 'Upcoming', badge: 'bg-[#044D29]/10 dark:bg-white/10 text-[#044D29] dark:text-white/80 border border-[#044D29]/20 dark:border-white/10', border: 'border-l-[#044D29]/30 dark:border-l-white/20', bar: 'bg-[#044D29]/30 dark:bg-white/20', icon: Calendar },
+  cancelled: { label: 'Cancelled', badge: 'bg-[#090D14] text-white/70 line-through decoration-2 decoration-[#C8102E]', border: 'border-l-[#090D14]/60 dark:border-l-white/20', bar: 'bg-[#090D14]/60 dark:bg-white/20', icon: X },
+  postponed: { label: 'Postponed', badge: 'bg-transparent border-2 border-[#DCA11D] text-[#DCA11D] font-black', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: AlertCircle },
 };
 
 const WARD_STATUS_KEYS = ['complete', 'mp-funded', 'pending'];
@@ -353,7 +353,7 @@ export default function CdfTracker() {
                 </div>
 
                 <div className="flex flex-col bg-white/5 border border-white/10 p-4 rounded-sm">
-                  <span className="font-sans font-black text-4xl text-[#044D29] text-emerald-400 leading-none">
+                  <span className="font-sans font-black text-4xl text-[#3FBF72] leading-none">
                     <AnimatedNumber value={images.length} />
                   </span>
                   <span className="text-[10px] font-sans font-black tracking-wider uppercase text-white/70 mt-2">
@@ -431,7 +431,7 @@ export default function CdfTracker() {
                   Proposed Consultation Schedule
                 </h3>
               </div>
-              <span className="text-xs font-sans font-bold text-slate-500 dark:text-white/50">
+              <span className="text-xs font-sans font-bold text-[#044D29]/70 dark:text-[#DCA11D]/70">
                 Add to Device Calendar &bull; Sync Events
               </span>
             </div>
@@ -507,7 +507,7 @@ export default function CdfTracker() {
                         <button
                           onClick={() => downloadICSFile(item)}
                           title="Download .ics Calendar File (Apple iOS / Outlook)"
-                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-[#044D29] dark:text-[#DCA11D] rounded-lg transition-colors border border-slate-200 dark:border-white/10"
+                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#DCA11D]/10 hover:bg-[#DCA11D]/20 dark:bg-white/10 dark:hover:bg-white/20 text-[#044D29] dark:text-[#DCA11D] rounded-lg transition-colors border border-[#DCA11D]/30 dark:border-white/10"
                         >
                           <Download className="h-3.5 w-3.5" />
                         </button>
@@ -519,7 +519,7 @@ export default function CdfTracker() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Share event on WhatsApp"
-                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-lg shadow-xs transition-colors"
+                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#C8102E] hover:bg-[#A00C24] text-white rounded-lg shadow-xs transition-colors"
                         >
                           <Share2 className="h-3.5 w-3.5" />
                         </a>
