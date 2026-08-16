@@ -385,7 +385,7 @@ export default function Header() {
 
                         {/* Dropdown Menu */}
                         {hasChildren && activeDropdown === item.id && (
-                          <div className="absolute left-0 top-full z-50 w-56 rounded-md bg-[#090D14] border-t-2 border-[#DCA11D] py-2 shadow-xl ring-1 ring-white/10 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <div className="absolute left-0 top-full z-50 w-56 rounded-md bg-[#090D14]/95 backdrop-blur-md border-t-2 border-[#DCA11D] py-2 shadow-xl ring-1 ring-white/10 animate-in fade-in slide-in-from-top-1 duration-200">
                             {item.children.map((child) => (
                               <a
                                 key={child.id}
@@ -449,7 +449,7 @@ export default function Header() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
             {/* Slanted Parliamentary Ebony background wedge starting just to the left of Parliament badge and extending to the right edge */}
             <div
-              className="absolute top-0 bottom-0 left-[-20px] sm:left-[-28px] right-[-100vw] bg-[#090D14] border-t border-[#DCA11D]/40 shadow-lg"
+              className="absolute top-0 bottom-0 left-[-20px] sm:left-[-28px] right-[-100vw] bg-[#090D14]/95 backdrop-blur-md border-t border-[#DCA11D]/40 shadow-lg"
               style={{
                 clipPath: 'polygon(36px 0, 100% 0, 100% 100%, 0% 100%)',
               }}

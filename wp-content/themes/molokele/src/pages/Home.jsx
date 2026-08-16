@@ -1,10 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { User, Mail, Landmark, FileText, MessageSquare, Newspaper, ArrowRight, X, ChevronLeft, ChevronRight, Play, Square, Camera, Award, ShieldCheck, Scale, CheckCircle2 } from 'lucide-react';
 import { useGalleryImages, findBySlug } from '../lib/wpMedia.js';
 import ZimbabweMap from '../lib/ZimbabweMap.jsx';
 import FlagStripe from '../lib/FlagStripe.jsx';
 
 const ACCENT_BORDERS = ['border-t-[#044D29]', 'border-t-[#DCA11D]', 'border-t-[#C8102E]'];
+
+// #044D29 reads fine on white/black cards but disappears against this section's
+// own #044D29 background — use the brighter brand-plum-light (#3FBF72) instead,
+// per the WCAG note on that token in index.css.
+const PRIORITIES = [
+  {
+    icon: Scale,
+    title: 'Mining Profit Sharing',
+    description: 'Demanding a minimum 10% community profit share from mining corporations operating in Whange to fund local infrastructure, health, and education.',
+    topBorder: 'border-t-[#C8102E]',
+    iconBg: 'bg-[#C8102E] text-white',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'ILO Convention 190',
+    description: "Spearheading the parliamentary campaign for Zimbabwe's ratification of ILO Convention 190 to guarantee safe, violence-free workplaces.",
+    topBorder: 'border-t-[#DCA11D]',
+    iconBg: 'bg-[#DCA11D] text-[#090D14]',
+  },
+  {
+    icon: CheckCircle2,
+    title: 'Health & Disability Reform',
+    description: 'Advocating for mental health funding, anti-stigma legislation, and an independent Disability Commission to protect vulnerable citizens.',
+    topBorder: 'border-t-[#3FBF72]',
+    iconBg: 'bg-[#3FBF72] text-[#090D14]',
+  },
+];
 
 const DEFAULT_HERO_IMAGE = '/wp-content/uploads/2026/08/home_cropped_top_extended.webp';
 const FALLBACK_SLIDES = [
@@ -46,6 +73,7 @@ export default function Home() {
   const cardRefs = useRef([]);
   const galleryTrackRef = useRef(null);
   const galleryItemRefs = useRef([]);
+  const lightboxTouchRef = useRef(0);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
   const { images: wpGalleryImages } = useGalleryImages('photo-gallery');
 
@@ -57,7 +85,63 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState(FALLBACK_SLIDES);
   const [isHeroPaused, setIsHeroPaused] = useState(false);
+  const [slideProgress, setSlideProgress] = useState(0); // 0 → 1
 
+  /* --- Unified rAF progress engine ---
+     One clock drives both the gold progress bar AND slide advancement.
+     No CSS animation, no setInterval — impossible to desync. */
+  const rafRef = useRef(null);
+  const slideStartRef = useRef(performance.now());
+  const pausedElapsedRef = useRef(0); // how much time had elapsed when we paused
+
+  const advanceSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    slideStartRef.current = performance.now();
+    pausedElapsedRef.current = 0;
+    setSlideProgress(0);
+  }, [slides.length]);
+
+  const goToSlide = useCallback((i) => {
+    const idx = ((i % slides.length) + slides.length) % slides.length;
+    setCurrentSlide(idx);
+    slideStartRef.current = performance.now();
+    pausedElapsedRef.current = 0;
+    setSlideProgress(0);
+  }, [slides.length]);
+
+  const goPrevSlide = useCallback(() => goToSlide(currentSlide - 1), [goToSlide, currentSlide]);
+  const goNextSlide = useCallback(() => goToSlide(currentSlide + 1), [goToSlide, currentSlide]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+
+    const tick = (now) => {
+      if (!isHeroPaused) {
+        const elapsed = pausedElapsedRef.current + (now - slideStartRef.current);
+        const progress = Math.min(elapsed / SLIDE_DURATION, 1);
+        setSlideProgress(progress);
+
+        if (progress >= 1) {
+          advanceSlide();
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [slides.length, isHeroPaused, advanceSlide]);
+
+  // When pausing, snapshot elapsed time; when resuming, reset the start reference
+  useEffect(() => {
+    if (isHeroPaused) {
+      pausedElapsedRef.current += performance.now() - slideStartRef.current;
+    } else {
+      slideStartRef.current = performance.now();
+    }
+  }, [isHeroPaused]);
+
+  // Fetch slides from WP API
   useEffect(() => {
     fetch('/wp-json/molokele/v1/hero-slides')
       .then((res) => res.json())
@@ -65,24 +149,15 @@ export default function Home() {
         if (Array.isArray(data) && data.length > 0) {
           setSlides(data);
           setCurrentSlide((prev) => (prev < data.length ? prev : 0));
+          slideStartRef.current = performance.now();
+          pausedElapsedRef.current = 0;
+          setSlideProgress(0);
         }
       })
       .catch(() => {});
   }, []);
 
   const slideImage = (slide, i) => slide.image || galleryImages[i]?.src || DEFAULT_HERO_IMAGE;
-
-  const goToSlide = (i) => setCurrentSlide(((i % slides.length) + slides.length) % slides.length);
-  const goPrevSlide = () => goToSlide(currentSlide - 1);
-  const goNextSlide = () => goToSlide(currentSlide + 1);
-
-  useEffect(() => {
-    if (slides.length <= 1 || isHeroPaused) return undefined;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, SLIDE_DURATION);
-    return () => clearInterval(timer);
-  }, [slides.length, isHeroPaused, currentSlide]);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -206,7 +281,7 @@ export default function Home() {
 
               {/* Subtle Parliamentary Gradient Overlay — soft directional tint & bottom vignette */}
               <div className="absolute inset-0 bg-gradient-to-r from-[#090D14]/65 via-[#044D29]/20 to-transparent pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/90 via-transparent to-black/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/90 via-transparent to-[#090D14]/35 pointer-events-none" />
             </div>
           );
         })}
@@ -295,29 +370,47 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Slide progress indicators */}
+            {/* Slide progress indicators — driven by rAF, not CSS animation */}
             {slides.length > 1 && (
-              <div className="flex items-center gap-2.5 mt-8 ml-2">
-                {slides.map((slide, i) => (
-                  <button
-                    key={slide.id || i}
-                    onClick={() => goToSlide(i)}
-                    aria-label={`Go to slide ${i + 1}`}
-                    className="group relative h-2 w-10 sm:w-14 rounded-full bg-white/20 overflow-hidden"
-                  >
-                    {i < currentSlide && <span className="absolute inset-y-0 left-0 w-full rounded-full bg-[#DCA11D]" />}
-                    {i === currentSlide && (
-                      <span
-                        key={`progress-${currentSlide}`}
-                        className="absolute inset-y-0 left-0 rounded-full bg-[#DCA11D] animate-molokele-hero-progress"
-                        style={{
-                          animationDuration: `${SLIDE_DURATION}ms`,
-                          animationPlayState: isHeroPaused ? 'paused' : 'running',
-                        }}
-                      />
-                    )}
-                  </button>
-                ))}
+              <div className="flex items-center gap-3 mt-8">
+                {slides.map((slide, i) => {
+                  const isPast = i < currentSlide;
+                  const isCurrent = i === currentSlide;
+                  const isFuture = i > currentSlide;
+
+                  return (
+                    <button
+                      key={slide.id || i}
+                      onClick={() => goToSlide(i)}
+                      aria-label={`Go to slide ${i + 1}`}
+                      className={`group relative h-2 rounded-full overflow-hidden transition-all duration-300 ${
+                        isCurrent
+                          ? 'w-16 sm:w-24 bg-white/25'
+                          : 'w-8 sm:w-12 bg-white/15 hover:bg-white/30'
+                      }`}
+                    >
+                      {/* Past slides: fully filled */}
+                      {isPast && (
+                        <span className="absolute inset-0 bg-[#DCA11D] rounded-full" />
+                      )}
+
+                      {/* Current slide: width driven by slideProgress (0→100%) */}
+                      {isCurrent && (
+                        <span
+                          className="absolute inset-y-0 left-0 bg-[#DCA11D] rounded-full"
+                          style={{ width: `${slideProgress * 100}%`, transition: 'none' }}
+                        />
+                      )}
+
+                      {/* Future slides: empty (just the bg-white/15 track) */}
+                    </button>
+                  );
+                })}
+
+                {/* Counter */}
+                <span className="font-mono text-xs font-black tracking-wider text-[#DCA11D] ml-1 tabular-nums">
+                  {String(currentSlide + 1).padStart(2, '0')}<span className="text-white/40 mx-0.5">/</span>{String(slides.length).padStart(2, '0')}
+                </span>
               </div>
             )}
 
@@ -374,54 +467,44 @@ export default function Home() {
         
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="inline-flex items-center gap-2 font-sans font-black text-xs uppercase tracking-[0.25em] text-[#DCA11D] bg-black/40 border border-[#DCA11D]/30 px-4 py-1.5 rounded-full">
+            <span className="inline-flex items-center gap-2 font-sans font-black text-xs uppercase tracking-[0.25em] text-[#DCA11D] bg-[#090D14]/60 border border-[#DCA11D]/30 px-4 py-1.5 rounded-full">
               <Award className="h-4 w-4" />
               Parliamentary Advocacy &amp; Pillars
             </span>
             <h2 className="mt-4 font-sans font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight text-white leading-tight">
               Championing Whange Central in Parliament
             </h2>
-            <p className="mt-4 font-serif text-base sm:text-lg text-slate-200 leading-relaxed">
+            <p className="mt-4 font-serif text-base sm:text-lg text-white/80 leading-relaxed">
               Legislative leadership grounded in trade union legacy, community profit-sharing, worker rights, and public health accountability.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#090D14]/80 border border-[#DCA11D]/30 rounded-xl p-8 hover:border-[#DCA11D] transition-all duration-300">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#C8102E] text-white mb-6">
-                <Scale className="h-6 w-6" />
-              </div>
-              <h3 className="font-sans font-black text-xl uppercase tracking-wide text-white">
-                Mining Profit Sharing
-              </h3>
-              <p className="mt-3 font-serif text-sm text-slate-300 leading-relaxed">
-                Demanding a minimum 10% community profit share from mining corporations operating in Whange to fund local infrastructure, health, and education.
-              </p>
-            </div>
+            {PRIORITIES.map((item, idx) => {
+              const Icon = item.icon;
+              const padIndex = String(idx + 1).padStart(2, '0');
 
-            <div className="bg-[#090D14]/80 border border-[#DCA11D]/30 rounded-xl p-8 hover:border-[#DCA11D] transition-all duration-300">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#DCA11D] text-black mb-6">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <h3 className="font-sans font-black text-xl uppercase tracking-wide text-white">
-                ILO Convention 190
-              </h3>
-              <p className="mt-3 font-serif text-sm text-slate-300 leading-relaxed">
-                Spearheading the parliamentary campaign for Zimbabwe's ratification of ILO Convention 190 to guarantee safe, violence-free workplaces.
-              </p>
-            </div>
+              return (
+                <div
+                  key={item.title}
+                  className={`group relative overflow-hidden bg-[#090D14]/80 border border-[#DCA11D]/20 border-t-4 ${item.topBorder} rounded-xl p-8 hover:border-[#DCA11D]/50 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300`}
+                >
+                  <span className="absolute bottom-3 right-5 font-serif font-black text-6xl select-none pointer-events-none text-white/[0.04] group-hover:text-[#DCA11D]/10 transition-colors duration-300">
+                    {padIndex}
+                  </span>
 
-            <div className="bg-[#090D14]/80 border border-[#DCA11D]/30 rounded-xl p-8 hover:border-[#DCA11D] transition-all duration-300">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#044D29] text-white border border-[#DCA11D]/40 mb-6">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-              <h3 className="font-sans font-black text-xl uppercase tracking-wide text-white">
-                Health &amp; Disability Reform
-              </h3>
-              <p className="mt-3 font-serif text-sm text-slate-300 leading-relaxed">
-                Advocating for mental health funding, anti-stigma legislation, and an independent Disability Commission to protect vulnerable citizens.
-              </p>
-            </div>
+                  <div className={`relative flex h-12 w-12 items-center justify-center rounded-lg mb-6 ${item.iconBg}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="relative font-sans font-black text-xl uppercase tracking-wide text-white">
+                    {item.title}
+                  </h3>
+                  <p className="relative mt-3 font-serif text-sm text-white/65 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -452,21 +535,20 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:divide-x md:divide-slate-200/60 dark:md:divide-white/10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {latestPosts.map((post, index) => {
               const image = post._embedded?.['wp:featuredmedia']?.[0];
               const postNum = String(index + 1).padStart(2, '0');
+              const activeBorder = ACCENT_BORDERS[index % ACCENT_BORDERS.length];
 
               return (
                 <a
                   key={post.id}
                   href={post.link}
-                  className={`group block overflow-hidden transition-all duration-300 relative ${
-                    index > 0 ? 'md:pl-8' : ''
-                  }`}
+                  className={`group flex flex-col overflow-hidden bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 border-t-4 ${activeBorder} rounded-xl shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300`}
                 >
                   {image && (
-                    <div className="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 mb-4 shadow-sm">
+                    <div className="aspect-[16/10] overflow-hidden">
                       <img
                         src={image.source_url}
                         alt={image.alt_text || ''}
@@ -475,7 +557,7 @@ export default function Home() {
                       />
                     </div>
                   )}
-                  <div>
+                  <div className="p-6 flex flex-col flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="h-2 w-2 rounded-full bg-[#C8102E]" />
                       <span className="font-sans font-black text-[9px] tracking-widest uppercase text-[#044D29] dark:text-[#DCA11D]">
@@ -487,8 +569,8 @@ export default function Home() {
                       dangerouslySetInnerHTML={{ __html: post.title.rendered }}
                     />
                     {post.excerpt?.rendered && (
-                      <div 
-                        className="mt-2 font-serif text-[13px] text-slate-600 dark:text-white/60 leading-relaxed line-clamp-2 pr-4"
+                      <div
+                        className="mt-2 font-serif text-[13px] text-slate-600 dark:text-white/60 leading-relaxed line-clamp-2"
                         dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
                       />
                     )}
@@ -503,6 +585,14 @@ export default function Home() {
       {/* Constituency Photo Gallery Section */}
       <section className="bg-[#090D14] py-20 sm:py-24 relative overflow-hidden border-t border-[#DCA11D]/30">
         <FlagStripe className="absolute top-0 left-0" />
+
+        {/* Ambient flag-colour glow + texture — without this the section is a flat
+            void on large screens; the gold dot grid and green/red blooms give it the
+            same "designed" depth as the Priorities section instead of reading as empty. */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.06] bg-[radial-gradient(#DCA11D_1px,transparent_1px)] [background-size:22px_22px]" />
+        <div className="absolute -top-40 -right-24 h-[30rem] w-[30rem] rounded-full bg-[#044D29]/40 blur-[130px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-24 h-[24rem] w-[24rem] rounded-full bg-[#C8102E]/[0.07] blur-[130px] pointer-events-none" />
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="mb-10 flex justify-between items-center border-b border-white/10 pb-6">
             <div className="flex items-center gap-4">
@@ -520,13 +610,15 @@ export default function Home() {
             </div>
             
             {galleryImages.length > 0 && (
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={() => {
                     const track = galleryTrackRef.current;
-                    if (track) track.scrollBy({ left: -320, behavior: 'smooth' });
+                    if (!track) return;
+                    const itemWidth = track.querySelector('[data-gallery-item]')?.offsetWidth || 320;
+                    track.scrollBy({ left: -(itemWidth + 24), behavior: 'smooth' });
                   }} 
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#DCA11D]/30 text-white hover:bg-[#C8102E] hover:border-[#C8102E] transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:bg-[#044D29] hover:text-[#DCA11D] hover:border-[#DCA11D]/50 transition-all duration-200"
                   aria-label="Previous photos"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -534,9 +626,11 @@ export default function Home() {
                 <button 
                   onClick={() => {
                     const track = galleryTrackRef.current;
-                    if (track) track.scrollBy({ left: 320, behavior: 'smooth' });
+                    if (!track) return;
+                    const itemWidth = track.querySelector('[data-gallery-item]')?.offsetWidth || 320;
+                    track.scrollBy({ left: itemWidth + 24, behavior: 'smooth' });
                   }} 
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#DCA11D]/30 text-white hover:bg-[#C8102E] hover:border-[#C8102E] transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 hover:bg-[#044D29] hover:text-[#DCA11D] hover:border-[#DCA11D]/50 transition-all duration-200"
                   aria-label="Next photos"
                 >
                   <ChevronRight className="h-5 w-5" />
@@ -545,103 +639,157 @@ export default function Home() {
             )}
           </div>
 
+          {/* Scrollable gallery track */}
           <div
             ref={galleryTrackRef}
-            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={() => {
+              const track = galleryTrackRef.current;
+              if (!track || galleryImages.length === 0) return;
+              const scrollRatio = track.scrollLeft / (track.scrollWidth - track.clientWidth || 1);
+              const idx = Math.round(scrollRatio * (galleryImages.length - 1));
+              setActiveGalleryIndex(Math.max(0, Math.min(idx, galleryImages.length - 1)));
+            }}
           >
             {galleryImages.map((img, i) => (
               <div
                 key={i}
+                data-gallery-item
                 ref={(el) => (galleryItemRefs.current[i] = el)}
                 onClick={() => {
                   setLightboxIndex(i);
                   setLightboxOpen(true);
                 }}
-                className="group relative aspect-[4/3] w-[85%] sm:w-[45%] lg:w-[31%] flex-shrink-0 snap-start overflow-hidden rounded-xl cursor-pointer border border-[#DCA11D]/30 hover:border-[#DCA11D] transition-all duration-300"
+                className="group relative aspect-[4/3] w-[82%] sm:w-[44%] lg:w-[30%] flex-shrink-0 snap-start cursor-pointer rounded-xl bg-gradient-to-b from-white/[0.09] to-white/[0.02] border border-white/15 p-1.5 shadow-xl shadow-black/40 hover:border-[#DCA11D]/60 hover:shadow-[#DCA11D]/10 transition-all duration-300"
               >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="h-full w-full bg-white/5 object-cover transition-transform duration-700 ease-out group-hover:scale-105 filter brightness-95 group-hover:brightness-100"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-[#090D14]/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center">
-                  <span className="text-black font-sans font-black text-[9px] tracking-widest uppercase bg-[#DCA11D] px-4 py-2 rounded-full shadow-lg scale-95 group-hover:scale-100 transition-all duration-300">
-                    Expand Photo
+                {/* Matted inner frame — separates the photo from the section's own
+                    dark background instead of letting dark photos melt into it. */}
+                <div className="relative h-full w-full overflow-hidden rounded-lg">
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    className="h-full w-full bg-white/5 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  {/* Hover overlay with gentle gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/85 via-[#090D14]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-5">
+                    <span className="text-[#090D14] font-sans font-black text-[9px] tracking-widest uppercase bg-[#DCA11D] px-5 py-2 rounded-full shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      View Photo
+                    </span>
+                  </div>
+                  {/* Photo number badge */}
+                  <span className="absolute top-3 left-3 font-mono text-[10px] font-black tracking-widest text-white/70 bg-[#090D14]/70 border border-white/10 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                    {String(i + 1).padStart(2, '0')}
                   </span>
+                  {/* Flag-accent hairline on hover */}
+                  <span className="absolute bottom-0 left-0 h-[2.5px] w-full bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Scroll position dots */}
+          {galleryImages.length > 3 && (
+            <div className="flex justify-center gap-1.5 mt-4">
+              {galleryImages.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    const el = galleryItemRefs.current[i];
+                    if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+                  }}
+                  aria-label={`Scroll to photo ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === activeGalleryIndex
+                      ? 'w-6 bg-[#DCA11D]'
+                      : 'w-1.5 bg-white/20 hover:bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Lightbox Modal */}
       {lightboxOpen && galleryImages.length > 0 && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-between bg-[#090D14]/95 backdrop-blur-md py-6 px-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-7xl flex items-center justify-between text-white font-sans">
-            <span className="text-xs font-black tracking-widest uppercase text-[#DCA11D]">
-              Image {lightboxIndex + 1} of {galleryImages.length}
+        <div
+          className="fixed inset-0 z-[100] flex flex-col bg-[#090D14]/95 backdrop-blur-xl animate-in fade-in duration-200"
+          onClick={(e) => { if (e.target === e.currentTarget) setLightboxOpen(false); }}
+          onTouchStart={(e) => { lightboxTouchRef.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            const dx = e.changedTouches[0].clientX - (lightboxTouchRef.current || 0);
+            if (Math.abs(dx) > 60) {
+              if (dx > 0) setLightboxIndex((p) => (p > 0 ? p - 1 : galleryImages.length - 1));
+              else setLightboxIndex((p) => (p < galleryImages.length - 1 ? p + 1 : 0));
+            }
+          }}
+        >
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 sm:px-8 py-4 flex-shrink-0">
+            <span className="text-xs font-black tracking-widest uppercase text-[#DCA11D] font-sans">
+              {String(lightboxIndex + 1).padStart(2, '0')} <span className="text-white/30">/ {String(galleryImages.length).padStart(2, '0')}</span>
             </span>
             <button
               onClick={() => setLightboxOpen(false)}
-              className="p-2 text-white hover:text-[#C8102E] transition-colors focus:outline-none"
-              aria-label="Close slideshow"
+              className="p-2 text-white/70 hover:text-[#C8102E] transition-colors focus:outline-none"
+              aria-label="Close gallery"
             >
               <X className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="relative flex-1 w-full flex items-center justify-center">
+          {/* Main image area */}
+          <div className="relative flex-1 flex items-center justify-center px-4 min-h-0">
             <button
-              onClick={() => setLightboxIndex((prev) => (prev > 0 ? prev - 1 : galleryImages.length - 1))}
-              className="absolute left-2 sm:left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-[#C8102E] hover:border-[#C8102E] transition-all duration-200 focus:outline-none"
+              onClick={() => setLightboxIndex((p) => (p > 0 ? p - 1 : galleryImages.length - 1))}
+              className="absolute left-2 sm:left-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-[#044D29] hover:text-[#DCA11D] hover:border-[#DCA11D]/50 transition-all duration-200 focus:outline-none"
               aria-label="Previous image"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
 
-            <div className="max-h-[60vh] max-w-[85vw] md:max-h-[70vh] flex items-center justify-center bg-black/60 p-2 border border-[#DCA11D]/30 rounded-xl shadow-2xl overflow-hidden">
+            <div className="max-h-[65vh] max-w-[85vw] md:max-h-[72vh] md:max-w-[75vw] flex items-center justify-center overflow-hidden rounded-xl">
               <img
+                key={lightboxIndex}
                 src={galleryImages[lightboxIndex].src}
                 alt={galleryImages[lightboxIndex].alt}
-                className="max-h-[58vh] max-w-full md:max-h-[68vh] object-contain rounded-lg animate-in fade-in zoom-in-95 duration-300 select-none"
+                className="max-h-[65vh] max-w-full md:max-h-[72vh] object-contain rounded-xl select-none animate-in fade-in zoom-in-95 duration-300"
+                draggable={false}
               />
             </div>
 
             <button
-              onClick={() => setLightboxIndex((prev) => (prev < galleryImages.length - 1 ? prev + 1 : 0))}
-              className="absolute right-2 sm:right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 border border-white/20 text-white hover:bg-[#C8102E] hover:border-[#C8102E] transition-all duration-200 focus:outline-none"
+              onClick={() => setLightboxIndex((p) => (p < galleryImages.length - 1 ? p + 1 : 0))}
+              className="absolute right-2 sm:right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-[#044D29] hover:text-[#DCA11D] hover:border-[#DCA11D]/50 transition-all duration-200 focus:outline-none"
               aria-label="Next image"
             >
               <ChevronRight className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="w-full max-w-2xl flex flex-col items-center gap-4 text-center">
+          {/* Caption + thumbnail strip */}
+          <div className="flex-shrink-0 px-4 sm:px-8 pb-4 pt-3">
             {galleryImages[lightboxIndex].alt && (
-              <p className="font-serif text-sm sm:text-base text-slate-200 leading-relaxed max-w-xl">
+              <p className="font-serif text-sm text-slate-300 text-center mb-3 leading-relaxed max-w-xl mx-auto">
                 {galleryImages[lightboxIndex].alt}
               </p>
             )}
 
-            <div className="flex gap-3 justify-center items-center overflow-x-auto py-2 px-4 max-w-full">
-              {galleryImages.map((img, idx) => {
-                const isActive = idx === lightboxIndex;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setLightboxIndex(idx)}
-                    className={`relative w-12 aspect-[4/3] rounded-md overflow-hidden flex-shrink-0 transition-all duration-300 outline-none ${
-                      isActive 
-                        ? 'ring-2 ring-[#DCA11D] scale-110 opacity-100 shadow-md' 
-                        : 'opacity-40 hover:opacity-100 border border-white/10'
-                    }`}
-                  >
-                    <img src={img.src} alt="" className="h-full w-full object-cover" />
-                  </button>
-                );
-              })}
+            <div className="flex gap-2 justify-center items-center overflow-x-auto py-2 px-4 max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setLightboxIndex(idx)}
+                  className={`relative w-14 aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 transition-all duration-300 outline-none ${
+                    idx === lightboxIndex 
+                      ? 'ring-2 ring-[#DCA11D] ring-offset-1 ring-offset-[#090D14] scale-105 opacity-100' 
+                      : 'opacity-30 hover:opacity-80 grayscale hover:grayscale-0'
+                  }`}
+                >
+                  <img src={img.src} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </button>
+              ))}
             </div>
           </div>
         </div>

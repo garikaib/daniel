@@ -10,43 +10,100 @@ import ZimbabweMap from '../lib/ZimbabweMap.jsx';
 import FlagStripe from '../lib/FlagStripe.jsx';
 import AnimatedNumber from '../lib/AnimatedNumber.jsx';
 
-const SCHEDULE_DATES_MAP = {
-  'Friday 14th August 2025 5:00 PM': { start: '20250814T150000Z', end: '20250814T170000Z' },
-  'Saturday 15th August 2025 11:00 AM': { start: '20250815T090000Z', end: '20250815T110000Z' },
-  'Saturday 15th August 2025 7:00 PM': { start: '20250815T170000Z', end: '20250815T190000Z' },
-  'Tuesday 18th August 2025 7:00 PM': { start: '20250818T170000Z', end: '20250818T190000Z' },
-  'Friday 21st August 2025 7:00 PM': { start: '20250821T170000Z', end: '20250821T190000Z' },
-  'Saturday 22nd August 2025 1:00 PM': { start: '20250822T110000Z', end: '20250822T130000Z' },
-  'Monday 31st August 2025 5:00 PM Final': { start: '20250831T150000Z', end: '20250831T170000Z' },
+// Icon keys stored in the backend (molokele_cdf_schedule / molokele_cdf_stages
+// options) map to these already-imported lucide components — see the matching
+// allow-list in molokele-tools.php.
+const CDF_ICON_MAP = {
+  users2: Users2,
+  'clipboard-check': ClipboardCheck,
+  'clipboard-list': ClipboardList,
+  'message-square': MessageSquare,
+  users: Users,
+  clock: Clock,
+  hammer: Hammer,
+  bell: Bell,
+  'refresh-cw': RefreshCw,
 };
 
-function getCalendarTimes(item) {
-  const key = `${item.date} ${item.time}`;
-  return SCHEDULE_DATES_MAP[key] || { start: '20250815T170000Z', end: '20250815T190000Z' };
+// Zimbabwe (CAT) is UTC+2 year-round, no DST — every datetime_iso value from
+// the backend (a bare "YYYY-MM-DDTHH:mm" from a <input type="datetime-local">)
+// is Whange Central local time. Anchoring it explicitly here means every
+// visitor, in any timezone, sees the same correct wall-clock time and the
+// same computed event status — a browser-local `new Date(iso)` parse would
+// silently shift both for anyone outside CAT.
+function toHarareDate(datetimeIso) {
+  if (!datetimeIso) return null;
+  const withSeconds = datetimeIso.length === 16 ? `${datetimeIso}:00` : datetimeIso;
+  const d = new Date(`${withSeconds}+02:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+const HARARE_TZ = 'Africa/Harare';
+const EVENT_DATE_FORMATTER = new Intl.DateTimeFormat('en-ZW', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: HARARE_TZ });
+const EVENT_TIME_FORMATTER = new Intl.DateTimeFormat('en-ZW', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: HARARE_TZ });
+const EVENT_DAY_FORMATTER = new Intl.DateTimeFormat('en-ZW', { day: 'numeric', timeZone: HARARE_TZ });
+const EVENT_WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-ZW', { weekday: 'short', timeZone: HARARE_TZ });
+const EVENT_MONTH_FORMATTER = new Intl.DateTimeFormat('en-ZW', { month: 'short', timeZone: HARARE_TZ });
+const EVENT_DAY_KEY_FORMATTER = new Intl.DateTimeFormat('en-CA', { timeZone: HARARE_TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+
+const formatEventDate = (d) => (d ? EVENT_DATE_FORMATTER.format(d) : '');
+const formatEventTime = (d) => (d ? EVENT_TIME_FORMATTER.format(d) : '');
+const harareDayKey = (d) => EVENT_DAY_KEY_FORMATTER.format(d);
+
+function getEventTimes(item) {
+  const start = toHarareDate(item.datetime_iso);
+  if (!start) return null;
+  const end = new Date(start.getTime() + (item.duration_minutes || 120) * 60000);
+  return { start, end };
+}
+
+// The consultation schedule's status badge used to be a hardcoded string
+// ("Active Today", "Tonight") frozen at whatever day the code was written —
+// once that date passed, the tracker kept showing stale status forever.
+// This derives status from the real clock instead, with a manual override
+// for when reality diverges from the calendar (cancelled/postponed meetings).
+function computeScheduleStatus(item, now) {
+  if (item.status_override && item.status_override !== 'auto') {
+    return item.status_override;
+  }
+  const times = getEventTimes(item);
+  if (!times) return 'upcoming';
+  if (now > times.end) return 'completed';
+  if (now >= times.start && now <= times.end) return 'live';
+  if (harareDayKey(now) === harareDayKey(times.start)) return 'today';
+  return 'upcoming';
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function toGoogleCalUTC(date) {
+  return `${date.getUTCFullYear()}${pad2(date.getUTCMonth() + 1)}${pad2(date.getUTCDate())}T${pad2(date.getUTCHours())}${pad2(date.getUTCMinutes())}${pad2(date.getUTCSeconds())}Z`;
+}
+
+function eventLocation(item) {
+  return item.is_whatsapp
+    ? 'WhatsApp Live Online — Whange Central Community Group'
+    : 'Whange Central Constituency Office, 1270 Baobab Extension, Whange, Zimbabwe';
 }
 
 function generateGoogleCalendarUrl(item) {
-  const times = getCalendarTimes(item);
+  const times = getEventTimes(item);
+  if (!times) return '#';
   const title = encodeURIComponent(`[CDF 2025] ${item.event}`);
   const details = encodeURIComponent(
     `Parliament of Zimbabwe — Whange Central CDF 2025 Campaign.\nEvent: ${item.event}\nType: ${item.type}\nAgenda: Review and submit 2025 Constituency Development Fund project proposals.\nHosted by: Hon. Fortune Daniel Molokele-Tsiye, MP.`
   );
-  const location = encodeURIComponent(
-    item.type.includes('WhatsApp')
-      ? 'WhatsApp Live Online — Whange Central Community Group'
-      : 'Whange Central Constituency Office, 1270 Baobab Extension, Whange, Zimbabwe'
-  );
+  const location = encodeURIComponent(eventLocation(item));
 
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${times.start}/${times.end}&details=${details}&location=${location}`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toGoogleCalUTC(times.start)}/${toGoogleCalUTC(times.end)}&details=${details}&location=${location}`;
 }
 
 function downloadICSFile(item) {
-  const times = getCalendarTimes(item);
+  const times = getEventTimes(item);
+  if (!times) return;
   const title = `[CDF 2025] ${item.event}`;
   const details = `Parliament of Zimbabwe — Whange Central CDF 2025 Campaign.\\nEvent: ${item.event}\\nType: ${item.type}\\nAgenda: Review and submit 2025 Constituency Development Fund project proposals.\\nHosted by: Hon. Fortune Daniel Molokele-Tsiye, MP.`;
-  const location = item.type.includes('WhatsApp')
-    ? 'WhatsApp Live Online — Whange Central Community Group'
-    : 'Whange Central Constituency Office, 1270 Baobab Extension, Whange, Zimbabwe';
+  const location = eventLocation(item);
 
   const icsContent = [
     'BEGIN:VCALENDAR',
@@ -56,8 +113,8 @@ function downloadICSFile(item) {
     `SUMMARY:${title}`,
     `DESCRIPTION:${details}`,
     `LOCATION:${location}`,
-    `DTSTART:${times.start}`,
-    `DTEND:${times.end}`,
+    `DTSTART:${toGoogleCalUTC(times.start)}`,
+    `DTEND:${toGoogleCalUTC(times.end)}`,
     'END:VEVENT',
     'END:VCALENDAR'
   ].join('\r\n');
@@ -71,73 +128,33 @@ function downloadICSFile(item) {
   document.body.removeChild(link);
 }
 
-const cdf2025Schedule = [
-  {
-    event: 'CDF Executive Committee Meeting',
-    date: 'Friday 14th August 2025',
-    time: '5:00 PM',
-    type: 'Executive Meeting',
-    icon: Users2,
-    badge: 'Completed',
-    badgeStyle: 'bg-[#044D29] text-white border border-[#DCA11D]/40'
-  },
-  {
-    event: 'CDF Implementation Committee Meeting',
-    date: 'Saturday 15th August 2025',
-    time: '11:00 AM',
-    type: 'Committee Meeting',
-    icon: ClipboardCheck,
-    badge: 'Active Today',
-    badgeStyle: 'bg-[#DCA11D] text-[#090D14] font-black'
-  },
-  {
-    event: 'Launch of Online Consultations (WhatsApp Live)',
-    date: 'Saturday 15th August 2025',
-    time: '7:00 PM',
-    type: 'WhatsApp Live Online',
-    icon: MessageSquare,
-    badge: 'Tonight',
-    badgeStyle: 'bg-[#C8102E] text-white font-black animate-pulse'
-  },
-  {
-    event: '2nd Online Consultation (WhatsApp Live)',
-    date: 'Tuesday 18th August 2025',
-    time: '7:00 PM',
-    type: 'WhatsApp Live Online',
-    icon: MessageSquare,
-    badge: 'Upcoming',
-    badgeStyle: 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white'
-  },
-  {
-    event: '3rd Online Consultation (WhatsApp Live)',
-    date: 'Friday 21st August 2025',
-    time: '7:00 PM',
-    type: 'WhatsApp Live Online',
-    icon: MessageSquare,
-    badge: 'Upcoming',
-    badgeStyle: 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white'
-  },
-  {
-    event: 'CDF Public Consultation Town Hall Meeting',
-    date: 'Saturday 22nd August 2025',
-    time: '1:00 PM',
-    type: 'Public Town Hall',
-    icon: Users,
-    badge: 'Public Meeting',
-    badgeStyle: 'bg-[#044D29] text-white border border-[#DCA11D]/40'
-  },
-  {
-    event: 'Submission Deadline for CDF 2025 Proposals',
-    date: 'Monday 31st August 2025',
-    time: '5:00 PM Final',
-    type: 'Parliament Deadline',
-    icon: Clock,
-    badge: 'FINAL DEADLINE',
-    badgeStyle: 'bg-[#C8102E] text-white font-black'
-  }
+// Fallback content — matches molokele-tools.php's default-seed functions
+// exactly, so the page renders correctly before anyone touches the admin
+// screen (same convention as FALLBACK_SLIDES in Home.jsx), and degrades
+// gracefully if the REST fetch below ever fails.
+const DEFAULT_CDF_CAMPAIGN = {
+  announcement_badge: 'Parliament Announcement • August CDF Month',
+  campaign_badge: '2025 Campaign',
+  title: 'CDF 2025 Project Proposal Campaign',
+  description: 'The Parliament of Zimbabwe has officially opened the call for 2025 Constituency Development Fund (CDF) project proposals for August. All residents, ward committees, and civil society groups in Whange Central are invited to participate in the upcoming consultation meetings.',
+  deadline_label: 'Final Submission Deadline',
+  deadline_datetime_iso: '2025-08-31T17:00',
+  deadline_note: 'Submit completed ward proposal forms to the Whange Central Constituency Office.',
+};
+
+// Note: the submission deadline is deliberately NOT duplicated as a 7th
+// schedule card — it already has its own callout box above. Repeating it
+// here is what used to orphan a lone card in the grid's last row.
+const DEFAULT_CDF_SCHEDULE = [
+  { id: 'evt-1', event: 'CDF Executive Committee Meeting', datetime_iso: '2025-08-14T17:00', duration_minutes: 120, type: 'Executive Meeting', is_whatsapp: false, icon: 'users2', status_override: 'auto' },
+  { id: 'evt-2', event: 'CDF Implementation Committee Meeting', datetime_iso: '2025-08-15T11:00', duration_minutes: 120, type: 'Committee Meeting', is_whatsapp: false, icon: 'clipboard-check', status_override: 'auto' },
+  { id: 'evt-3', event: 'Launch of Online Consultations (WhatsApp Live)', datetime_iso: '2025-08-15T19:00', duration_minutes: 120, type: 'WhatsApp Live Online', is_whatsapp: true, icon: 'message-square', status_override: 'auto' },
+  { id: 'evt-4', event: '2nd Online Consultation (WhatsApp Live)', datetime_iso: '2025-08-18T19:00', duration_minutes: 120, type: 'WhatsApp Live Online', is_whatsapp: true, icon: 'message-square', status_override: 'auto' },
+  { id: 'evt-5', event: '3rd Online Consultation (WhatsApp Live)', datetime_iso: '2025-08-21T19:00', duration_minutes: 120, type: 'WhatsApp Live Online', is_whatsapp: true, icon: 'message-square', status_override: 'auto' },
+  { id: 'evt-6', event: 'CDF Public Consultation Town Hall Meeting', datetime_iso: '2025-08-22T13:00', duration_minutes: 120, type: 'Public Town Hall', is_whatsapp: false, icon: 'users', status_override: 'auto' },
 ];
 
-const wards = [
+const DEFAULT_CDF_WARDS = [
   { ward: 'Ward 1', place: 'Chibondo', status: 'complete', note: 'Solar-powered borehole at Megawatts Primary School — operational, serving pupils and residents.' },
   { ward: 'Ward 4', place: 'Baghdad', status: 'complete', note: 'Fully installed and delivering fresh water since February.' },
   { ward: 'Ward 5', place: 'Empumalanga', status: 'mp-funded', note: 'Installation stalled when CDF funds ran out — the MP personally covered the outstanding US$2,000 to finish the job.' },
@@ -145,19 +162,33 @@ const wards = [
   { ward: 'Ward 14', place: 'Ngumija', status: 'pending', note: 'Water scarcity remains severe. Initial CDF funds were exhausted — the office is now sourcing external funding.' },
 ];
 
+const DEFAULT_CDF_STAGES = [
+  { icon: 'users2', title: 'Ward Development Committee Meetings', body: 'Councillors, PR reps, and ward committees convene to open the project cycle.' },
+  { icon: 'clipboard-list', title: 'Public Consultations & Resident Briefs', body: 'Communities are briefed directly and given the chance to raise concerns before drilling starts.' },
+  { icon: 'hammer', title: 'Borehole Drilling & Solar Installation', body: 'Jimmy Jimmy Borehole Company carries out the physical works, ward by ward.' },
+  { icon: 'clipboard-check', title: 'Project Review & Technical Audits', body: "The MP's office and contractor jointly verify completed work against what was promised." },
+  { icon: 'refresh-cw', title: 'Feedback & Next-Cycle Proposals', body: 'Lessons from this cycle — including funding gaps — feed directly into next year\'s CDF proposal.' },
+];
+
+// Unified status-pill language for both the Ward Status Board and the
+// Consultation Schedule — one style system instead of two ad-hoc ones, kept
+// in the flag palette (green = done, gold = today/funded gap, red = needs
+// attention, neutral = informational).
 const STATUS_STYLES = {
+  // Ward Status Board
   complete: { label: 'Complete', badge: 'bg-[#044D29] text-white border border-[#DCA11D]/30', border: 'border-l-[#044D29]', bar: 'bg-[#044D29]', icon: CheckCircle2 },
   'mp-funded': { label: 'Complete — MP-Funded Gap', badge: 'bg-[#DCA11D] text-[#090D14] font-black', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: HandCoins },
   pending: { label: 'Pending', badge: 'bg-[#C8102E] text-white font-black', border: 'border-l-[#C8102E]', bar: 'bg-[#C8102E]', icon: Clock },
+  // Consultation Schedule
+  completed: { label: 'Completed', badge: 'bg-[#044D29] text-white border border-[#DCA11D]/30', border: 'border-l-[#044D29]', bar: 'bg-[#044D29]', icon: CheckCircle2 },
+  live: { label: 'Live Now', badge: 'bg-[#C8102E] text-white font-black animate-pulse', border: 'border-l-[#C8102E]', bar: 'bg-[#C8102E]', icon: MessageSquare },
+  today: { label: 'Today', badge: 'bg-[#DCA11D] text-[#090D14] font-black', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: Bell },
+  upcoming: { label: 'Upcoming', badge: 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white', border: 'border-l-slate-300 dark:border-l-white/20', bar: 'bg-slate-300 dark:bg-white/20', icon: Calendar },
+  cancelled: { label: 'Cancelled', badge: 'bg-slate-500 text-white line-through decoration-2', border: 'border-l-slate-500', bar: 'bg-slate-500', icon: X },
+  postponed: { label: 'Postponed', badge: 'bg-amber-500 text-white font-black', border: 'border-l-amber-500', bar: 'bg-amber-500', icon: AlertCircle },
 };
 
-const stages = [
-  { icon: Users2, title: 'Ward Development Committee Meetings', body: 'Councillors, PR reps, and ward committees convene to open the project cycle.' },
-  { icon: ClipboardList, title: 'Public Consultations & Resident Briefs', body: 'Communities are briefed directly and given the chance to raise concerns before drilling starts.' },
-  { icon: Hammer, title: 'Borehole Drilling & Solar Installation', body: 'Jimmy Jimmy Borehole Company carries out the physical works, ward by ward.' },
-  { icon: ClipboardCheck, title: 'Project Review & Technical Audits', body: "The MP's office and contractor jointly verify completed work against what was promised." },
-  { icon: RefreshCw, title: 'Feedback & Next-Cycle Proposals', body: 'Lessons from this cycle — including funding gaps — feed directly into next year\'s CDF proposal.' },
-];
+const WARD_STATUS_KEYS = ['complete', 'mp-funded', 'pending'];
 
 function FilterButton({ active, onClick, children }) {
   return (
@@ -178,6 +209,43 @@ export default function CdfTracker() {
   const revealRefs = useRef([]);
   const { images } = useGalleryImages('cdf-tracker');
   const [photoFilter, setPhotoFilter] = useState('all');
+
+  // Campaign header, consultation schedule, ward status board, and project
+  // stages are all admin-editable (Molokele Tools → CDF Tracker). Seed with
+  // the same defaults the backend ships with so the page never renders
+  // empty/broken before the fetch resolves — same convention as the
+  // homepage hero slider (FALLBACK_SLIDES in Home.jsx).
+  const [cdfCampaign, setCdfCampaign] = useState(DEFAULT_CDF_CAMPAIGN);
+  const [cdfSchedule, setCdfSchedule] = useState(DEFAULT_CDF_SCHEDULE);
+  const [cdfWards, setCdfWards] = useState(DEFAULT_CDF_WARDS);
+  const [cdfStages, setCdfStages] = useState(DEFAULT_CDF_STAGES);
+
+  useEffect(() => {
+    fetch('/wp-json/molokele/v1/cdf-campaign').then((res) => res.json()).then((data) => {
+      if (data && !data.code) setCdfCampaign(data);
+    }).catch(() => {});
+
+    fetch('/wp-json/molokele/v1/cdf-schedule').then((res) => res.json()).then((data) => {
+      if (Array.isArray(data) && data.length > 0) setCdfSchedule(data);
+    }).catch(() => {});
+
+    fetch('/wp-json/molokele/v1/cdf-wards').then((res) => res.json()).then((data) => {
+      if (Array.isArray(data) && data.length > 0) setCdfWards(data);
+    }).catch(() => {});
+
+    fetch('/wp-json/molokele/v1/cdf-stages').then((res) => res.json()).then((data) => {
+      if (Array.isArray(data) && data.length > 0) setCdfStages(data);
+    }).catch(() => {});
+  }, []);
+
+  // Drives the auto-computed schedule status (Completed / Live Now / Today /
+  // Upcoming) — ticks every minute so a "Live Now" badge doesn't need a page
+  // refresh to flip to "Completed" once an event ends.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const filteredPhotos = images.filter((img) => {
     if (photoFilter === 'all') return true;
@@ -226,7 +294,7 @@ export default function CdfTracker() {
     revealCount += 1;
   };
 
-  const completeCount = wards.filter((w) => w.status !== 'pending').length;
+  const completeCount = cdfWards.filter((w) => w.status !== 'pending').length;
 
   return (
     <div className="w-full bg-slate-50 dark:bg-[#090D14] font-sans">
@@ -268,7 +336,7 @@ export default function CdfTracker() {
               <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-white/10 pt-8">
                 <div className="flex flex-col bg-white/5 border border-white/10 p-4 rounded-sm">
                   <span className="font-sans font-black text-4xl text-[#DCA11D] leading-none">
-                    <AnimatedNumber value={completeCount} /><span className="text-lg text-white/40 font-normal ml-1">/5</span>
+                    <AnimatedNumber value={completeCount} /><span className="text-lg text-white/40 font-normal ml-1">/{cdfWards.length}</span>
                   </span>
                   <span className="text-[10px] font-sans font-black tracking-wider uppercase text-white/70 mt-2">
                     Wards Fully Active
@@ -325,17 +393,17 @@ export default function CdfTracker() {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-[#044D29] text-white px-3.5 py-1 rounded-sm border border-[#DCA11D]/40 shadow-sm">
                   <Bell className="h-3.5 w-3.5 text-[#DCA11D]" />
-                  Parliament Announcement • August CDF Month
+                  {cdfCampaign.announcement_badge}
                 </span>
                 <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest bg-[#C8102E] text-white px-3 py-1 rounded-sm shadow-sm">
-                  2025 Campaign
+                  {cdfCampaign.campaign_badge}
                 </span>
               </div>
               <h2 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-[#090D14] dark:text-white leading-tight">
-                CDF 2025 Project Proposal Campaign
+                {cdfCampaign.title}
               </h2>
               <p className="mt-2 font-serif text-sm sm:text-base text-slate-700 dark:text-white/80 max-w-3xl leading-relaxed">
-                The Parliament of Zimbabwe has officially opened the call for 2025 Constituency Development Fund (CDF) project proposals for August. All residents, ward committees, and civil society groups in Whange Central are invited to participate in the upcoming consultation meetings.
+                {cdfCampaign.description}
               </p>
             </div>
 
@@ -343,13 +411,13 @@ export default function CdfTracker() {
             <div className="bg-[#044D29] text-white p-6 rounded-sm border border-[#DCA11D]/40 shrink-0 lg:max-w-xs flex flex-col justify-center shadow-md">
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#DCA11D]">
                 <AlertCircle className="h-4 w-4 text-[#DCA11D]" />
-                Final Submission Deadline
+                {cdfCampaign.deadline_label}
               </div>
               <p className="mt-2 font-sans font-black text-xl text-white">
-                Monday 31st August 2025
+                {formatEventDate(toHarareDate(cdfCampaign.deadline_datetime_iso))}
               </p>
               <p className="mt-1 font-serif text-xs text-white/80">
-                Submit completed ward proposal forms to the Whange Central Constituency Office.
+                {cdfCampaign.deadline_note}
               </p>
             </div>
           </div>
@@ -360,7 +428,7 @@ export default function CdfTracker() {
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-[#044D29] dark:text-[#DCA11D]" />
                 <h3 className="font-sans font-black text-lg sm:text-xl uppercase tracking-wide text-[#090D14] dark:text-white">
-                  Proposed Consultation Schedule — August 2025
+                  Proposed Consultation Schedule
                 </h3>
               </div>
               <span className="text-xs font-sans font-bold text-slate-500 dark:text-white/50">
@@ -368,75 +436,95 @@ export default function CdfTracker() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cdf2025Schedule.map((item, idx) => {
+            {/* flex-wrap + fixed card widths (not a CSS grid) so a trailing
+                incomplete row centers instead of hugging left with a stark
+                empty void — resilient for any future event count. */}
+            <div className="flex flex-wrap justify-center gap-6">
+              {cdfSchedule.map((item) => {
+                const times = getEventTimes(item);
+                const status = computeScheduleStatus(item, now);
+                const style = STATUS_STYLES[status] || STATUS_STYLES.upcoming;
+                const StatusIcon = style.icon;
+
                 return (
                   <div
-                    key={idx}
-                    className="flex flex-col justify-between p-5 rounded-sm border-l-4 border-l-[#044D29] border-y border-r border-slate-200 dark:border-white/10 bg-white dark:bg-[#090D14] shadow-sm hover:shadow-md transition-all duration-200"
+                    key={item.id}
+                    className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
                   >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-sm shadow-xs ${item.badgeStyle}`}>
-                          {item.badge}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-white/40">
-                          {item.type}
-                        </span>
-                      </div>
-                      <h4 className="font-sans font-black text-sm uppercase tracking-wide text-[#090D14] dark:text-white leading-snug">
-                        {item.event}
-                      </h4>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/10 space-y-3">
-                      <div className="flex items-center justify-between text-xs font-sans">
-                        <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-white/80">
-                          <Calendar className="h-3.5 w-3.5 text-[#044D29] dark:text-[#DCA11D]" />
-                          <span>{item.date}</span>
+                    <div
+                      className={`group flex h-full flex-col justify-between overflow-hidden rounded-sm border-l-4 ${style.border} border-y border-r border-slate-200 dark:border-white/10 bg-white dark:bg-[#090D14] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+                    >
+                      <div className="p-5 flex gap-4">
+                        {/* Calendar tile — day-at-a-glance, replaces the old cramped mono-text date */}
+                        <div className="flex-shrink-0 w-16 rounded-sm border border-slate-200 dark:border-white/10 overflow-hidden self-start">
+                          <div className="bg-[#044D29] text-center py-1 text-[9px] font-black uppercase tracking-widest text-[#DCA11D]">
+                            {times ? EVENT_WEEKDAY_FORMATTER.format(times.start) : '—'}
+                          </div>
+                          <div className="flex flex-col items-center bg-slate-50 dark:bg-white/5 py-1.5">
+                            <span className="font-sans font-black text-2xl leading-none text-[#090D14] dark:text-white">
+                              {times ? EVENT_DAY_FORMATTER.format(times.start) : '?'}
+                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mt-0.5">
+                              {times ? EVENT_MONTH_FORMATTER.format(times.start) : ''}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 font-mono font-black text-[#C8102E] dark:text-[#DCA11D]">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>{item.time}</span>
+
+                        <div className="flex-1 min-w-0">
+                          <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-sm ${style.badge}`}>
+                            <StatusIcon className="h-2.5 w-2.5" />
+                            {style.label}
+                          </span>
+                          <h4 className="mt-2 font-sans font-black text-sm uppercase tracking-wide text-[#090D14] dark:text-white leading-snug">
+                            {item.event}
+                          </h4>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px]">
+                            <span className="inline-flex items-center gap-1 font-mono font-black text-[#C8102E] dark:text-[#DCA11D]">
+                              <Clock className="h-3 w-3" />
+                              {times ? formatEventTime(times.start) : ''}
+                            </span>
+                            <span className="text-slate-300 dark:text-white/20">&bull;</span>
+                            <span className="font-sans font-semibold text-slate-500 dark:text-white/40">
+                              {item.type}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Interactive Calendar Actions (Google, iCal/iOS, WhatsApp) */}
-                      <div className="flex items-center gap-1.5 pt-1">
+                      <div className="px-5 pb-5 pt-1 flex items-center gap-1.5">
                         <a
                           href={generateGoogleCalendarUrl(item)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Add to Google Calendar (Android / Desktop)"
-                          className="flex-1 inline-flex items-center justify-center gap-1 bg-[#044D29] hover:bg-[#03381e] text-white !text-white text-[10px] font-black uppercase tracking-wider py-1.5 px-2 rounded-sm transition-colors border border-[#DCA11D]/30"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#044D29] hover:bg-[#03381e] text-white !text-white text-[10px] font-black uppercase tracking-wider py-2 px-2 rounded-lg transition-colors border border-[#DCA11D]/30"
                         >
-                          <CalendarPlus className="h-3 w-3 text-[#DCA11D]" />
-                          <span>Google Cal</span>
+                          <CalendarPlus className="h-3.5 w-3.5 text-[#DCA11D]" />
+                          <span>Google</span>
                         </a>
 
                         <button
                           onClick={() => downloadICSFile(item)}
                           title="Download .ics Calendar File (Apple iOS / Outlook)"
-                          className="flex-1 inline-flex items-center justify-center gap-1 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-[#090D14] dark:text-white text-[10px] font-black uppercase tracking-wider py-1.5 px-2 rounded-sm transition-colors border border-slate-200 dark:border-white/10"
+                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-[#044D29] dark:text-[#DCA11D] rounded-lg transition-colors border border-slate-200 dark:border-white/10"
                         >
-                          <Download className="h-3 w-3 text-[#044D29] dark:text-[#DCA11D]" />
-                          <span>Apple / iCal</span>
+                          <Download className="h-3.5 w-3.5" />
                         </button>
 
                         <a
                           href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                            `📌 *Whange Central CDF 2025 Campaign*\n\nEvent: ${item.event}\nDate: ${item.date}\nTime: ${item.time}\nType: ${item.type}\n\nJoin us for constituency progress planning! Hosted by Hon. Fortune Daniel Molokele-Tsiye, MP.`
+                            `📌 *Whange Central CDF 2025 Campaign*\n\nEvent: ${item.event}\nDate: ${times ? formatEventDate(times.start) : ''}\nTime: ${times ? formatEventTime(times.start) : ''}\nType: ${item.type}\n\nJoin us for constituency progress planning! Hosted by Hon. Fortune Daniel Molokele-Tsiye, MP.`
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Share event on WhatsApp"
-                          className="inline-flex items-center justify-center p-1.5 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-sm shadow-xs transition-colors shrink-0"
+                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-lg shadow-xs transition-colors"
                         >
                           <Share2 className="h-3.5 w-3.5" />
                         </a>
                       </div>
                     </div>
-
                   </div>
                 );
               })}
@@ -464,22 +552,22 @@ export default function CdfTracker() {
         {/* Segmented Progress Bar */}
         <div ref={registerReveal} className="molokele-card-reveal mb-10">
           <div className="flex w-full h-3 rounded-sm overflow-hidden bg-slate-200 dark:bg-white/10 shadow-inner">
-            {wards.map((w) => (
+            {cdfWards.map((w, i) => (
               <div
                 key={w.ward}
                 className={`flex-1 ${STATUS_STYLES[w.status].bar} ${
-                  wards.indexOf(w) > 0 ? 'border-l-2 border-white dark:border-[#090D14]' : ''
+                  i > 0 ? 'border-l-2 border-white dark:border-[#090D14]' : ''
                 }`}
                 title={`${w.ward} — ${STATUS_STYLES[w.status].label}`}
               />
             ))}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-            {Object.entries(STATUS_STYLES).map(([key, style]) => (
+            {WARD_STATUS_KEYS.map((key) => (
               <div key={key} className="flex items-center gap-2">
-                <span className={`h-3 w-3 rounded-sm ${style.bar}`} />
+                <span className={`h-3 w-3 rounded-sm ${STATUS_STYLES[key].bar}`} />
                 <span className="font-sans text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-white/70">
-                  {style.label}
+                  {STATUS_STYLES[key].label}
                 </span>
               </div>
             ))}
@@ -487,7 +575,7 @@ export default function CdfTracker() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {wards.map((w, i) => {
+          {cdfWards.map((w, i) => {
             const style = STATUS_STYLES[w.status];
             const StatusIcon = style.icon;
             const wardNum = w.ward.replace('Ward ', '').padStart(2, '0');
@@ -549,8 +637,8 @@ export default function CdfTracker() {
             <div className="absolute left-7 top-0 bottom-0 w-1 bg-[#044D29] hidden sm:block" />
             
             <div className="space-y-10">
-              {stages.map((s, i) => {
-                const Icon = s.icon;
+              {cdfStages.map((s, i) => {
+                const Icon = CDF_ICON_MAP[s.icon] || Bell;
                 return (
                   <div
                     key={i}

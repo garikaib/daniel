@@ -1,6 +1,6 @@
 # 🏛️ Molokele WordPress Child Theme
 
-WordPress block child theme scaffold for **Hon. Daniel Molokele** (Hwange Central MP). 
+WordPress block child theme scaffold for **Hon. Daniel Molokele** (Whange Central MP). 
 
 Extends the **Twenty Twenty-Five** core template via Full Site Editing (FSE) template parts, mounting a modern React 19 + Vite 8 + Tailwind CSS v4 application into the site's layout containers (`#molokele-root`, `#molokele-header-root`, and `#molokele-footer-root`).
 

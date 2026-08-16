@@ -1,6 +1,6 @@
 # molokele-tools
 
-Utility plugin scaffold for Hon. Daniel Molokele (Hwange Central MP). Adds a "Molokele Tools" admin page mounted with React 19 + Vite 8 + Tailwind CSS v4.
+Utility plugin scaffold for Hon. Daniel Molokele (Whange Central MP). Adds a "Molokele Tools" admin page mounted with React 19 + Vite 8 + Tailwind CSS v4.
 
 ## Build commands (from repo root, i.e. `/home/garikaib/Documents/sites/daniel`)
 

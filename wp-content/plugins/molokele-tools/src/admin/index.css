@@ -1,1 +1,163 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-green: #044D29;
+    --brand-green-hover: #03381e;
+    --brand-green-light: #3FBF72;
+    --brand-red: #C8102E;
+    --brand-red-hover: #A00C24;
+    --brand-gold: #DCA11D;
+    --brand-charcoal: #0D0D0D;
+    --brand-paper: #FAF9F5;
+  }
+}
+
+/* ==========================================================================
+   WORDPRESS ADMIN CSS ISOLATION & HIGH CONTRAST OVERRIDES
+   WP Admin default stylesheets inject aggressive styling on h1-h4, a, p, input.
+   These scoped rules guarantee bulletproof contrast, layout, and rendering.
+   ========================================================================== */
+
+.molokele-admin-scope {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  color: #0f172a !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.molokele-admin-scope * {
+  box-sizing: border-box;
+}
+
+.molokele-admin-scope h1,
+.molokele-admin-scope h2,
+.molokele-admin-scope h3,
+.molokele-admin-scope h4,
+.molokele-admin-scope h5,
+.molokele-admin-scope h6 {
+  font-family: inherit !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure headings on dark containers are always bright and readable */
+.molokele-admin-scope .text-white,
+.molokele-admin-scope .text-white h1,
+.molokele-admin-scope .text-white h2,
+.molokele-admin-scope .text-white h3,
+.molokele-admin-scope .text-white h4 {
+  color: #ffffff !important;
+}
+
+.molokele-admin-scope p {
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.molokele-admin-scope a {
+  text-decoration: none !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease-in-out;
+}
+
+.molokele-admin-scope a:focus,
+.molokele-admin-scope button:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(4, 77, 41, 0.3) !important;
+}
+
+.molokele-admin-scope input,
+.molokele-admin-scope textarea,
+.molokele-admin-scope select {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  max-width: 100% !important;
+}
+
+.molokele-admin-scope input:focus,
+.molokele-admin-scope textarea:focus,
+.molokele-admin-scope select:focus {
+  border-color: #044D29 !important;
+  box-shadow: 0 0 0 3px rgba(4, 77, 41, 0.15) !important;
+  outline: none !important;
+}
+
+/* Tri-color Zimbabwe Ribbon */
+.molokele-flag-stripe {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #044D29 0%,
+    #044D29 33.33%,
+    #DCA11D 33.33%,
+    #DCA11D 66.66%,
+    #C8102E 66.66%,
+    #C8102E 100%
+  );
+}
+
+/* Smooth Entrance Animations */
+@keyframes molokeleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes molokeleSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-molokele-fade-in {
+  animation: molokeleFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-molokele-slide-in-right {
+  animation: molokeleSlideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Sleek Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Interactive Card Transitions */
+.molokele-card-interactive {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+.molokele-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+}
