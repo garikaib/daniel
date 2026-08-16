@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
 import ZimbabweMap from './ZimbabweMap.jsx';
 import FlagStripe from './FlagStripe.jsx';
@@ -13,8 +13,9 @@ const slideMeta = (slide) => ([
 ]);
 
 // Alternative homepage hero — full-bleed dissolve slides, a translucent
-// glass placard, and a static thumbnail rail. Deliberately keeps the
-// default system cursor throughout (no cursor-follow / drag affordances).
+// glass placard, and a bottom-right navigator dock: thumbnails magnify and
+// lift toward the cursor (dock-style "flyout"), settling back into a flat
+// row on mouseleave, next to text prev/next controls and a numbered counter.
 // Toggle between this and HeroCurrent.jsx via the "Homepage Hero Style"
 // display setting in Molokele Tools.
 export default function HeroEditorial({
@@ -28,6 +29,24 @@ export default function HeroEditorial({
   goToSlide,
   slideImage,
 }) {
+  // Dock "flyout" magnification — thumbnails scale and lift toward the
+  // cursor's x-position, proportional to proximity, then relax back to a
+  // flat row once the pointer leaves the dock.
+  const thumbRefs = useRef([]);
+  const [dockMouseX, setDockMouseX] = useState(null);
+
+  const thumbTransform = (i) => {
+    const el = thumbRefs.current[i];
+    if (dockMouseX == null || !el) return 'scale(1) translateY(0px)';
+    const rect = el.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const distance = Math.abs(dockMouseX - center);
+    const proximity = Math.max(0, 1 - distance / 90);
+    const scale = 1 + proximity * 0.55;
+    const lift = proximity * 14;
+    return `scale(${scale.toFixed(3)}) translateY(-${lift.toFixed(1)}px)`;
+  };
+
   return (
     <section
       ref={heroSectionRef}
@@ -87,22 +106,6 @@ export default function HeroEditorial({
         className="pointer-events-none absolute -right-24 -bottom-32 h-[32rem] w-auto text-white/[0.025] hidden lg:block z-[1]"
         highlightClassName="fill-[#DCA11D]/[0.06]"
       />
-
-      {/* Large editorial slide numeral + progress hairline */}
-      {slides.length > 1 && (
-        <div className="absolute top-6 right-4 sm:right-8 md:right-12 z-20 text-right select-none drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-          <div className="font-serif leading-none text-white">
-            <span className="text-4xl sm:text-5xl font-black tabular-nums">{String(currentSlide + 1).padStart(2, '0')}</span>
-            <span className="text-base sm:text-lg text-white/40 ml-1">/ {String(slides.length).padStart(2, '0')}</span>
-          </div>
-          <div className="mt-2 h-px w-20 sm:w-24 bg-white/15 ml-auto overflow-hidden">
-            <div
-              className="h-full bg-[#DCA11D]"
-              style={{ width: `${slideProgress * 100}%`, transition: 'none' }}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Arrow navigation — solid parliament-black discs with a gold
           outline, turning solid flag-red on hover. */}
@@ -179,41 +182,82 @@ export default function HeroEditorial({
         </div>
       </div>
 
-      {/* Thumbnail rail — tucked into the hero's right edge beneath the
-          numeral/arrow column. Click to jump; no cursor-follow motion, so
-          the pointer stays a normal arrow. */}
+      {/* Bottom-right slide navigator — a dock of thumbnails that magnify
+          and lift toward the cursor (flyout), flanked by text prev/next
+          controls and a numbered counter with its own progress hairline.
+          Thumbnails settle back into a flat row once the pointer leaves. */}
       {slides.length > 1 && (
-        <div className="hidden lg:flex flex-col items-end gap-2 absolute right-4 sm:right-8 md:right-12 bottom-10 md:bottom-14 z-30">
-          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#DCA11D]/80 pr-1">
-            Gallery
-          </span>
-          <div className="flex items-center gap-2 rounded-xl border border-[#DCA11D]/25 bg-[#090D14]/75 backdrop-blur-xl p-2 shadow-2xl">
-            {slides.map((slide, i) => {
-              const isActive = i === currentSlide;
-              return (
-                <button
-                  key={slide.id || i}
-                  onClick={() => goToSlide(i)}
-                  aria-label={`Go to slide ${i + 1}: ${slide.title}`}
-                  title={slide.title}
-                  className={`relative overflow-hidden rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? 'w-16 h-12 ring-2 ring-[#DCA11D]'
-                      : 'w-11 h-9 opacity-45 grayscale hover:opacity-90 hover:grayscale-0'
-                  }`}
-                >
-                  <img
-                    src={slideImage(slide, i)}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                  {isActive && (
-                    <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
-                  )}
-                </button>
-              );
-            })}
+        <div className="absolute right-4 sm:right-8 md:right-12 bottom-10 md:bottom-14 z-30 flex flex-col gap-2">
+          <div
+            onMouseMove={(e) => setDockMouseX(e.clientX)}
+            onMouseLeave={() => setDockMouseX(null)}
+            className="flex items-end gap-3 rounded-2xl border border-[#DCA11D]/25 bg-[#090D14]/75 backdrop-blur-xl px-3 py-2.5 shadow-2xl"
+          >
+            <button
+              onClick={goPrevSlide}
+              aria-label="Previous slide"
+              className="hidden lg:inline-flex items-center gap-1 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-[#DCA11D] transition-colors"
+            >
+              <ChevronLeft className="h-3 w-3" />
+              Prev
+            </button>
+
+            <div className="hidden lg:flex items-end gap-2">
+              {slides.map((slide, i) => {
+                const isActive = i === currentSlide;
+                return (
+                  <button
+                    key={slide.id || i}
+                    ref={(el) => (thumbRefs.current[i] = el)}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Go to slide ${i + 1}: ${slide.title}`}
+                    title={slide.title}
+                    style={{ transform: thumbTransform(i), transformOrigin: 'bottom center' }}
+                    className={`relative overflow-hidden rounded-lg w-11 h-9 transition-[transform,opacity,filter] duration-200 ease-out ${
+                      isActive ? 'ring-2 ring-[#DCA11D] opacity-100' : 'opacity-45 grayscale hover:opacity-90 hover:grayscale-0'
+                    }`}
+                  >
+                    <img
+                      src={slideImage(slide, i)}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                    {isActive && (
+                      <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={goNextSlide}
+              aria-label="Next slide"
+              className="hidden lg:inline-flex items-center gap-1 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-[#DCA11D] transition-colors"
+            >
+              Next
+              <ChevronRight className="h-3 w-3" />
+            </button>
+
+            {/* Numbered counter — re-triggers its fade/slide-in animation
+                on every slide change via the currentSlide key. */}
+            <div
+              key={currentSlide}
+              className="pl-3 ml-1 border-l border-white/15 text-right select-none animate-in fade-in slide-in-from-bottom-2 duration-300"
+            >
+              <div className="font-serif leading-none text-white">
+                <span className="text-xl sm:text-2xl font-black tabular-nums">{String(currentSlide + 1).padStart(2, '0')}</span>
+                <span className="text-xs text-white/40 ml-0.5">/{String(slides.length).padStart(2, '0')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px w-full bg-white/15 overflow-hidden rounded-full">
+            <div
+              className="h-full bg-[#DCA11D]"
+              style={{ width: `${slideProgress * 100}%`, transition: 'none' }}
+            />
           </div>
         </div>
       )}
