@@ -199,7 +199,7 @@ export default function HeroEditorial({
           controls and a numbered counter with its own progress hairline.
           Thumbnails settle back into a flat row once the pointer leaves. */}
       {slides.length > 1 && (
-        <div className="absolute right-4 sm:right-8 md:right-12 bottom-10 md:bottom-14 z-30 flex flex-col gap-2">
+        <div className="absolute right-4 sm:right-8 md:right-12 bottom-14 md:bottom-20 z-30 flex flex-col gap-2">
           <div
             onMouseMove={(e) => setDockMouseX(e.clientX)}
             onMouseLeave={() => setDockMouseX(null)}
@@ -232,18 +232,28 @@ export default function HeroEditorial({
                     ref={(el) => (thumbRefs.current[i] = el)}
                     onClick={() => goToSlide(i)}
                     aria-label={`Go to slide ${i + 1}: ${slide.title}`}
-                    style={{ transform, zIndex, filter: filterValue, transformOrigin: 'bottom center' }}
-                    className={`relative overflow-visible rounded-lg w-12 h-10 transition-[transform,filter,opacity] duration-[280ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                      isActive ? 'ring-2 ring-[#DCA11D]' : ''
-                    } ${revealed ? 'opacity-100' : 'opacity-45'}`}
+                    style={{ zIndex }}
+                    className={`relative overflow-visible rounded-lg w-12 h-10 transition-opacity duration-[280ms] ${
+                      revealed ? 'opacity-100' : 'opacity-45'
+                    }`}
                   >
+                    {/* Title tag — a sibling of the scaled/rotated thumbnail
+                        below, not a child of it, so it stays a fixed, crisp
+                        size instead of inheriting the flyout's 3x scale and
+                        14° tilt (which is what turned it into a giant
+                        diagonal ribbon). */}
                     <span
-                      className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-[#DCA11D]/40 bg-[#090D14] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-[#DCA11D] shadow-lg transition-opacity duration-150"
+                      className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border border-[#DCA11D]/40 bg-[#090D14] px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-[#DCA11D] shadow-lg transition-opacity duration-150"
                       style={{ opacity: eased > 0.4 ? 1 : 0 }}
                     >
                       {slide.title}
                     </span>
-                    <span className="relative block h-full w-full overflow-hidden rounded-lg">
+                    <span
+                      style={{ transform, filter: filterValue, transformOrigin: 'bottom center' }}
+                      className={`relative block h-full w-full overflow-hidden rounded-lg transition-[transform,filter] duration-[280ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                        isActive ? 'ring-2 ring-[#DCA11D]' : ''
+                      }`}
+                    >
                       <img
                         src={slideImage(slide, i)}
                         alt=""
