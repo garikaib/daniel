@@ -72,6 +72,33 @@ function molokele_is_vite_dev() {
 }
 
 /**
+ * React Fast Refresh needs its "preamble" (the runtime that
+ * @vitejs/plugin-react's JSX transform checks for) installed on window
+ * before any transformed component module executes. Vite injects this
+ * automatically into an index.html it controls, but WP prints the script
+ * tags itself, so it has to be added by hand — and early, since it's a
+ * module script and must run before the vite-client/app module scripts.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( ! molokele_is_vite_dev() ) {
+			return;
+		}
+		?>
+		<script type="module">
+			import RefreshRuntime from "http://localhost:5173/@react-refresh";
+			RefreshRuntime.injectIntoGlobalHook(window);
+			window.$RefreshReg$ = () => {};
+			window.$RefreshSig$ = () => (type) => type;
+			window.__vite_plugin_react_preamble_installed__ = true;
+		</script>
+		<?php
+	},
+	1
+);
+
+/**
  * Enqueue scripts and styles.
  */
 add_action(

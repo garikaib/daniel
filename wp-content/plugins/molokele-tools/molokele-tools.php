@@ -120,6 +120,32 @@ function molokele_tools_render_admin_page() {
 }
 
 /**
+ * React Fast Refresh needs its "preamble" installed on window before any
+ * transformed component module executes — see the matching wp_head hook in
+ * the theme's functions.php for the full explanation. wp-admin prints its
+ * own scripts too, so the admin bundle needs the same early injection.
+ */
+add_action(
+	'admin_head',
+	function () {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( strpos( $page, 'molokele-tools' ) === false || ! molokele_tools_is_vite_dev() ) {
+			return;
+		}
+		?>
+		<script type="module">
+			import RefreshRuntime from "http://localhost:5174/@react-refresh";
+			RefreshRuntime.injectIntoGlobalHook(window);
+			window.$RefreshReg$ = () => {};
+			window.$RefreshSig$ = () => (type) => type;
+			window.__vite_plugin_react_preamble_installed__ = true;
+		</script>
+		<?php
+	},
+	1
+);
+
+/**
  * Enqueue scripts and styles in the admin area.
  */
 add_action(
@@ -223,15 +249,22 @@ add_action(
 
 function molokele_tools_get_settings() {
 	$default_settings = array(
-		'columns'         => '3',
-		'shadow'          => 'shadow-md',
-		'border_radius'   => 'rounded-sm',
-		'autoplay'        => false,
-		'autoplay_speed'  => '3000',
-		'backdrop_blur'   => 'backdrop-blur-md',
+		'columns'            => '3',
+		'shadow'             => 'shadow-md',
+		'border_radius'      => 'rounded-sm',
+		'autoplay'           => false,
+		'autoplay_speed'     => '3000',
+		'backdrop_blur'      => 'backdrop-blur-md',
+		// Which homepage hero layout renders: 'current' (the live design) or
+		// 'alternative' (the editorial gallery slideshow). See Home.jsx and
+		// lib/HeroCurrent.jsx / lib/HeroEditorial.jsx in the theme.
+		'hero_display_mode' => 'current',
 	);
 
-	$settings = get_option( 'molokele_gallery_settings', $default_settings );
+	// Merge saved settings over the defaults so older saved values (from
+	// before hero_display_mode existed) still get a valid value.
+	$saved    = get_option( 'molokele_gallery_settings', array() );
+	$settings = wp_parse_args( is_array( $saved ) ? $saved : array(), $default_settings );
 	return rest_ensure_response( $settings );
 }
 

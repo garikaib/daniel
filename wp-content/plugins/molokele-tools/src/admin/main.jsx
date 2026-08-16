@@ -418,6 +418,7 @@ function App() {
     autoplay: false,
     autoplay_speed: '3000',
     backdrop_blur: 'backdrop-blur-md',
+    hero_display_mode: 'current',
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -1337,6 +1338,75 @@ function App() {
                     {isSavingHero ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save Slides
                   </button>
+                </div>
+              </div>
+
+              {/* Homepage Hero Display Mode */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <LayoutDashboard className="h-5 w-5 text-[#044D29]" />
+                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
+                        Homepage Hero Style
+                      </h3>
+                    </div>
+                    <p className="text-slate-500 text-xs mt-1">
+                      Choose which hero slideshow layout renders on the homepage. Both read the slides above.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={isSavingSettings}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#C8102E] hover:bg-[#A00C24] px-5 py-2.5 font-sans font-black text-xs tracking-widest uppercase text-white shadow-md transition-all disabled:opacity-50 flex-shrink-0"
+                  >
+                    {isSavingSettings ? 'Saving...' : 'Save Style'}
+                    <Save className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      settings.hero_display_mode !== 'alternative'
+                        ? 'border-[#044D29] bg-[#044D29]/5'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="hero_display_mode"
+                      className="mt-1 h-4 w-4 text-[#044D29] focus:ring-[#044D29]"
+                      checked={settings.hero_display_mode !== 'alternative'}
+                      onChange={() => setSettings({ ...settings, hero_display_mode: 'current' })}
+                    />
+                    <span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-slate-900">Current</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">
+                        The live homepage hero — full-bleed card overlay with gold progress-bar pills.
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      settings.hero_display_mode === 'alternative'
+                        ? 'border-[#044D29] bg-[#044D29]/5'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="hero_display_mode"
+                      className="mt-1 h-4 w-4 text-[#044D29] focus:ring-[#044D29]"
+                      checked={settings.hero_display_mode === 'alternative'}
+                      onChange={() => setSettings({ ...settings, hero_display_mode: 'alternative' })}
+                    />
+                    <span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-slate-900">Alternative</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">
+                        Editorial gallery slideshow — glass placard, spec-sheet meta row, thumbnail rail.
+                      </span>
+                    </span>
+                  </label>
                 </div>
               </div>
 

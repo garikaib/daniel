@@ -10,6 +10,10 @@ export default defineConfig({
     host: true,
     port: 5174,
     strictPort: true,
+    // wp-admin is served from https://daniel.ddev.site while Vite serves
+    // module scripts from localhost:5174 — cross-origin <script type="module">
+    // requests always go through CORS, so the dev server needs to allow it.
+    cors: true,
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
