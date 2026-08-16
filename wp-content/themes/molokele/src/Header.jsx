@@ -447,9 +447,9 @@ export default function Header() {
           }`}
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-            {/* Slanted green background wedge starting just to the left of Parliament badge and extending to the right edge */}
+            {/* Slanted Parliamentary Ebony background wedge starting just to the left of Parliament badge and extending to the right edge */}
             <div
-              className="absolute top-0 bottom-0 left-[-20px] sm:left-[-28px] right-[-100vw] bg-[#044D29] border-t border-[#DCA11D]/40 shadow-lg"
+              className="absolute top-0 bottom-0 left-[-20px] sm:left-[-28px] right-[-100vw] bg-[#090D14] border-t border-[#DCA11D]/40 shadow-lg"
               style={{
                 clipPath: 'polygon(36px 0, 100% 0, 100% 100%, 0% 100%)',
               }}
