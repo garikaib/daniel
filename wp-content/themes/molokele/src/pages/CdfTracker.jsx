@@ -182,6 +182,7 @@ const STATUS_STYLES = {
   // Consultation Schedule
   completed: { label: 'Completed', badge: 'bg-[#044D29] text-white border border-[#DCA11D]/30', border: 'border-l-[#044D29]', bar: 'bg-[#044D29]', icon: CheckCircle2 },
   live: { label: 'Live Now', badge: 'bg-[#C8102E] text-white font-black animate-pulse', border: 'border-l-[#C8102E]', bar: 'bg-[#C8102E]', icon: MessageSquare },
+  ongoing: { label: 'Ongoing', badge: 'bg-[#DCA11D] text-[#090D14] font-black animate-pulse', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: RefreshCw },
   today: { label: 'Today', badge: 'bg-[#DCA11D] text-[#090D14] font-black', border: 'border-l-[#DCA11D]', bar: 'bg-[#DCA11D]', icon: Bell },
   upcoming: { label: 'Upcoming', badge: 'bg-[#044D29]/10 dark:bg-white/10 text-[#044D29] dark:text-white/80 border border-[#044D29]/20 dark:border-white/10', border: 'border-l-[#044D29]/30 dark:border-l-white/20', bar: 'bg-[#044D29]/30 dark:bg-white/20', icon: Calendar },
   cancelled: { label: 'Cancelled', badge: 'bg-[#090D14] text-white/70 line-through decoration-2 decoration-[#C8102E]', border: 'border-l-[#090D14]/60 dark:border-l-white/20', bar: 'bg-[#090D14]/60 dark:bg-white/20', icon: X },

@@ -583,7 +583,7 @@ function molokele_tools_save_cdf_schedule( $request ) {
 	}
 
 	$allowed_icons    = array( 'users2', 'clipboard-check', 'message-square', 'users', 'clock', 'hammer', 'bell', 'clipboard-list', 'refresh-cw' );
-	$allowed_statuses = array( 'auto', 'completed', 'cancelled', 'postponed' );
+	$allowed_statuses = array( 'auto', 'completed', 'ongoing', 'cancelled', 'postponed' );
 
 	$clean = array();
 	foreach ( $params as $event ) {

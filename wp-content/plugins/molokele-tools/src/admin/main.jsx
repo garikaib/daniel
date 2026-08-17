@@ -30,6 +30,7 @@ const CDF_ICON_OPTIONS = Object.entries(CDF_ICON_MAP).map(([value, { label }]) =
 const CDF_STATUS_OVERRIDE_OPTIONS = [
   { value: 'auto', label: 'Auto (compute from date/time)' },
   { value: 'completed', label: 'Force: Completed' },
+  { value: 'ongoing', label: 'Force: Ongoing' },
   { value: 'cancelled', label: 'Force: Cancelled' },
   { value: 'postponed', label: 'Force: Postponed' },
 ];
