@@ -4,6 +4,7 @@ import { useGalleryImages, findBySlug } from '../lib/wpMedia.js';
 import FlagStripe from '../lib/FlagStripe.jsx';
 import HeroCurrent from '../lib/HeroCurrent.jsx';
 import HeroEditorial from '../lib/HeroEditorial.jsx';
+import HeroMinimal from '../lib/HeroMinimal.jsx';
 
 const ACCENT_BORDERS = ['border-t-[#044D29]', 'border-t-[#DCA11D]', 'border-t-[#C8102E]'];
 
@@ -260,11 +261,23 @@ export default function Home() {
     <div className="w-full bg-[#FAF9F5] dark:bg-[#090D14] font-sans relative overflow-x-hidden">
       
 
-      {/* Homepage hero — swaps between HeroCurrent.jsx and
-          HeroEditorial.jsx based on the "Homepage Hero Style" display
-          setting (Molokele Tools → Display Settings). Both share the same
+      {/* Homepage hero — swaps between HeroCurrent.jsx,
+          HeroEditorial.jsx, and HeroMinimal.jsx based on the "Homepage Hero Style"
+          display setting (Molokele Tools → Display Settings). All share the same
           slide state/controls above. */}
-      {heroDisplayMode === 'alternative' ? (
+      {heroDisplayMode === 'minimal' ? (
+        <HeroMinimal
+          heroSectionRef={heroSectionRef}
+          setIsHeroPaused={setIsHeroPaused}
+          slides={slides}
+          currentSlide={currentSlide}
+          slideProgress={slideProgress}
+          goPrevSlide={goPrevSlide}
+          goNextSlide={goNextSlide}
+          goToSlide={goToSlide}
+          slideImage={slideImage}
+        />
+      ) : heroDisplayMode === 'alternative' ? (
         <HeroEditorial
           heroSectionRef={heroSectionRef}
           setIsHeroPaused={setIsHeroPaused}

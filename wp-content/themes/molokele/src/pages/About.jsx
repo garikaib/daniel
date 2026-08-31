@@ -127,7 +127,7 @@ export default function About() {
               <div className="relative bg-white dark:bg-white/5 p-4 rounded-sm border border-slate-200 dark:border-white/10 shadow-xl">
                 <img
                   {...img('daniel_profile_public_08', 'Hon. Molokele early career')}
-                  className="w-full aspect-[4/3] object-cover rounded-sm bg-brand-sand filter grayscale group-hover:grayscale-0 transition-all duration-700"
+                  className="w-full aspect-[4/5] sm:aspect-[3/4] object-cover object-top rounded-sm bg-brand-sand filter grayscale group-hover:grayscale-0 transition-all duration-700"
                 />
                 <div className="mt-4 font-sans">
                   <span className="text-[10px] font-black tracking-widest text-brand-pink uppercase">Early Career Activist</span>
@@ -154,7 +154,7 @@ export default function About() {
             <div className="relative bg-white dark:bg-white/5 p-4 rounded-sm border border-slate-200 dark:border-white/10 shadow-xl">
               <img
                 {...img('daniel_profile_public_05', 'Hon. Molokele at University of Zimbabwe')}
-                className="w-full aspect-[4/3] object-cover rounded-sm bg-brand-sand filter contrast-105"
+                className="w-full aspect-[4/5] sm:aspect-[3/4] object-cover object-top rounded-sm bg-brand-sand filter contrast-105"
               />
               <div className="mt-4 font-sans">
                 <span className="text-[10px] font-black tracking-widest text-brand-blue uppercase">University of Zimbabwe</span>
@@ -254,11 +254,11 @@ export default function About() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 p-2 rounded-sm border border-white/10">
-                <img {...img('daniel_profile_public_25', 'Highlanders FC')} className="w-full aspect-[4/3] object-cover rounded-sm bg-white/10 filter grayscale hover:grayscale-0 transition-all" />
+                <img {...img('daniel_profile_public_25', 'Highlanders FC')} className="w-full aspect-[3/4] object-cover object-top rounded-sm bg-white/10 filter grayscale hover:grayscale-0 transition-all" />
                 <span className="text-[9px] text-white/50 uppercase font-sans tracking-widest mt-1 block text-center">Bosso for life</span>
               </div>
               <div className="bg-white/5 p-2 rounded-sm border border-white/10">
-                <img {...img('daniel_profile_public_20', 'Arsenal Zimbabwe')} className="w-full aspect-[4/3] object-cover rounded-sm bg-white/10 filter grayscale hover:grayscale-0 transition-all" />
+                <img {...img('daniel_profile_public_20', 'Arsenal Zimbabwe')} className="w-full aspect-[3/4] object-cover object-top rounded-sm bg-white/10 filter grayscale hover:grayscale-0 transition-all" />
                 <span className="text-[9px] text-white/50 uppercase font-sans tracking-widest mt-1 block text-center">COYG Supporters</span>
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function About() {
             <div className="relative bg-white dark:bg-white/5 p-4 rounded-sm border border-slate-200 dark:border-white/10 shadow-xl space-y-4">
               <img
                 {...img('daniel_profile_public_15', 'Hon. Molokele speaking in Parliament')}
-                className="w-full aspect-[4/3] object-cover rounded-sm bg-brand-sand filter contrast-105"
+                className="w-full aspect-[3/2] sm:aspect-[16/10] object-cover object-center rounded-sm bg-brand-sand filter contrast-105"
               />
               <div className="font-sans border-t border-brand-sand dark:border-white/10 pt-4">
                 <span className="text-[10px] font-black tracking-widest text-brand-pink uppercase">Committee Chairman</span>
@@ -336,7 +336,7 @@ export default function About() {
               <div className="relative bg-white dark:bg-white/5 p-4 rounded-sm border border-slate-200 dark:border-white/10 shadow-xl">
                 <img
                   {...img('daniel_profile_public_02', 'Hon. Molokele national spokesperson')}
-                  className="w-full aspect-[4/3] object-cover rounded-sm bg-brand-sand filter contrast-105"
+                  className="w-full aspect-[16/10] sm:aspect-[16/9] object-cover object-center rounded-sm bg-brand-sand filter contrast-105"
                 />
                 <div className="mt-4 font-sans">
                   <span className="text-[10px] font-black tracking-widest text-brand-blue uppercase">Spokesperson &amp; Voice</span>

@@ -51,7 +51,7 @@ const timeline = [
     icon: Vote,
     title: 'Whange Central Elects Its MP',
     imageSlug: 'daniel_profile_public_22',
-    imageAlt: 'Hon. Molokele with community members in Whange',
+    imageAlt: 'Hon. Molokele supporting community outreach and food security in Whange',
     body: 'He is elected Member of Parliament for Whange Central — the seat that turns a career of organising for other people\'s causes into direct responsibility for his own community\'s.',
   },
   {
@@ -187,7 +187,7 @@ export default function Biography() {
                         <img
                           src={entryImg.url}
                           alt={entry.imageAlt}
-                          className="w-full aspect-[4/3] object-cover bg-slate-100 dark:bg-white/5 group-hover:scale-105 transition-transform duration-500"
+                          className="w-full aspect-[4/3] object-cover object-top bg-slate-100 dark:bg-white/5 group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                         />
                       </div>

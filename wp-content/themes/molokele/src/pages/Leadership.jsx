@@ -68,6 +68,12 @@ function Category({ id, icon: Icon, label, description, roles, imageSlug, imageA
   }, []);
 
   const img = imageSlug ? findBySlug(images, imageSlug) : null;
+  const fallbackMap = {
+    'gemini_generated_image_n8e86yn8e86yn8e8-1': '/wp-content/uploads/2026/08/Gemini_Generated_Image_n8e86yn8e86yn8e8-1-scaled.webp',
+    'whatsapp-image-2026-08-12-at-07-05-35-1': '/wp-content/uploads/2026/08/WhatsApp-Image-2026-08-12-at-07.05.35-1.jpeg',
+    'daniel_profile_public_28': '/wp-content/uploads/2026/08/daniel_profile_public_28.webp',
+  };
+  const imgSrc = img?.url || (imageSlug ? fallbackMap[imageSlug] : null);
 
   return (
     <section id={id} ref={revealRef} className="molokele-card-reveal py-16 sm:py-20 border-b border-slate-200 dark:border-white/10">
@@ -83,12 +89,12 @@ function Category({ id, icon: Icon, label, description, roles, imageSlug, imageA
             </div>
             <p className="font-serif text-sm text-slate-600 dark:text-white/60 leading-relaxed">{description}</p>
             
-            {img && (
+            {imgSrc && (
               <div className="mt-6 overflow-hidden rounded-sm border border-brand-sand dark:border-white/10 shadow-md">
                 <img
-                  src={img.url}
+                  src={imgSrc}
                   alt={imageAlt}
-                  className="w-full aspect-[4/3] object-cover bg-brand-sand dark:bg-white/5"
+                  className="w-full aspect-[16/10] sm:aspect-[4/3] object-cover object-top bg-brand-sand dark:bg-white/5"
                   loading="lazy"
                 />
               </div>
@@ -114,29 +120,29 @@ export default function Leadership() {
     <div className="w-full bg-slate-50 dark:bg-[#090D14] font-sans">
 
       {/* Hero */}
-      <section className="relative w-full bg-[#090D14] py-20 sm:py-28 overflow-hidden border-b border-[#DCA11D]/30">
+      <section className="relative w-full bg-[#090D14] py-12 sm:py-16 md:py-20 overflow-hidden border-b border-[#DCA11D]/30">
         <FlagStripe className="absolute top-0 left-0 w-full h-1 z-10" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-7">
-              <p className="font-sans font-black text-xs sm:text-sm tracking-[0.3em] uppercase text-[#DCA11D]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <p className="font-sans font-black text-xs tracking-[0.3em] uppercase text-[#DCA11D]">
                 Parliament of Zimbabwe • Leadership Portfolio
               </p>
-              <h1 className="mt-4 font-sans font-black text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white leading-[1.05]">
+              <h1 className="font-sans font-black text-3xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white leading-[1.05]">
                 From Whange<br />to the World Stage
               </h1>
-              <p className="mt-6 font-serif italic text-lg sm:text-xl text-white/80 max-w-xl">
+              <p className="font-serif italic text-base sm:text-lg text-white/80 max-w-xl leading-relaxed">
                 Parliament, party, and a dozen tables in between — where he holds the pen, and why
                 it matters for Whange Central.
               </p>
             </div>
             {heroImg && (
-              <div className="lg:col-span-5">
-                <div className="overflow-hidden rounded-sm border-4 border-white/10 shadow-2xl">
+              <div className="lg:col-span-5 flex justify-center lg:justify-end">
+                <div className="overflow-hidden rounded-sm border border-white/15 shadow-xl max-w-xs sm:max-w-[320px] w-full bg-white/5">
                   <img
                     src={heroImg.url}
                     alt="Hon. Molokele, official portrait, Parliament of Zimbabwe"
-                    className="w-full aspect-[4/3] object-cover bg-white/10"
+                    className="w-full aspect-[4/3] object-cover object-top max-h-[280px]"
                   />
                 </div>
               </div>
@@ -171,8 +177,8 @@ export default function Leadership() {
         label="In Parliament"
         description="Six years in the National Assembly, spent chairing the committees that decide how health and education actually get funded."
         roles={parliamentRoles}
-        imageSlug="daniel_profile_public_13"
-        imageAlt="Hon. Molokele, official Parliament of Zimbabwe portrait"
+        imageSlug="gemini_generated_image_n8e86yn8e86yn8e8-1"
+        imageAlt="Hon. Daniel Molokele active in parliamentary debates and committee leadership"
       />
 
       <Category
@@ -200,8 +206,8 @@ export default function Leadership() {
         label="In the Community"
         description="Faith, football, and the free press — the institutions built and chaired outside of government, because leadership doesn't stop at the chamber door."
         roles={communityRoles}
-        imageSlug="daniel_profile_public_17"
-        imageAlt="Hon. Molokele speaking at a Christian Legal Society of Zimbabwe event"
+        imageSlug="whatsapp-image-2026-08-12-at-07-05-35-1"
+        imageAlt="Hon. Daniel Molokele participating in community leadership and civic engagements"
         reverse
       />
 

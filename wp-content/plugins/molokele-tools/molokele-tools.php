@@ -255,9 +255,10 @@ function molokele_tools_get_settings() {
 		'autoplay'           => false,
 		'autoplay_speed'     => '3000',
 		'backdrop_blur'      => 'backdrop-blur-md',
-		// Which homepage hero layout renders: 'current' (the live design) or
-		// 'alternative' (the editorial gallery slideshow). See Home.jsx and
-		// lib/HeroCurrent.jsx / lib/HeroEditorial.jsx in the theme.
+		// Which homepage hero layout renders: 'current' (the live design),
+		// 'alternative' (the editorial gallery slideshow), or 'minimal'
+		// (the minimalist low-profile ribbon). See Home.jsx and
+		// lib/HeroCurrent.jsx / lib/HeroEditorial.jsx / lib/HeroMinimal.jsx.
 		'hero_display_mode' => 'current',
 	);
 

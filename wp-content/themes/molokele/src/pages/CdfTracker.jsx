@@ -369,7 +369,7 @@ export default function CdfTracker() {
               <div className="relative w-full aspect-[4/5] bg-slate-900 overflow-hidden shadow-2xl border border-white/10 rounded-sm">
                 <img
                   src="/wp-content/uploads/2026/08/daniel_profile_public_22.webp"
-                  alt="Hon. Molokele"
+                  alt="Hon. Daniel Molokele participating in community outreach and food security in Whange Central"
                   className="w-full h-full object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />

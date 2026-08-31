@@ -240,7 +240,7 @@ export default function Family() {
 
           <div className="md:col-span-2 space-y-4">
             <div className="overflow-hidden rounded-xl border border-brand-sand dark:border-white/10 shadow-md group">
-              <img {...img('daniel_profile_public_30', "Portrait of Godfrey Majahana Mguni, Hon. Molokele's father")} className="w-full aspect-[4/3] object-cover bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+              <img {...img('daniel_profile_public_30', "Portrait of Godfrey Majahana Mguni, Hon. Molokele's father")} className="w-full aspect-[4/5] object-cover object-top bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
               <div className="px-4 py-3 bg-white dark:bg-brand-blue border-t border-slate-100 dark:border-white/10">
                 <p className="font-sans text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white">
                   Godfrey Majahana Mguni
@@ -251,7 +251,7 @@ export default function Family() {
               </div>
             </div>
             <div className="overflow-hidden rounded-xl border border-brand-sand dark:border-white/10 shadow-md group">
-              <img src="/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp" alt="Mrs Jane Mpofu" className="w-full aspect-[4/3] object-cover bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+              <img src="/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp" alt="Mrs Jane Mpofu" className="w-full aspect-[4/5] object-cover object-top bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
               <div className="px-4 py-3 bg-white dark:bg-brand-blue border-t border-slate-100 dark:border-white/10">
                 <p className="font-sans text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white">
                   Mrs Jane Mpofu
@@ -354,9 +354,9 @@ export default function Family() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-center">
             <div className="md:col-span-2 order-2 md:order-1">
               <div className="overflow-hidden rounded-xl border border-brand-sand dark:border-white/10 shadow-md group">
-                <img {...img('daniel_profile_public_22', 'Hon. Molokele with community members in Whange')} className="w-full aspect-[4/3] object-cover bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                <img {...img('daniel_profile_public_22', 'Hon. Daniel Molokele with community members during a local rice donation drive in Whange')} className="w-full aspect-[4/3] object-cover bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 <p className="px-3 py-2 font-sans text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40 dark:bg-brand-blue">
-                  Back home, with the community in Whange
+                  Community outreach &amp; food security drive in Whange
                 </p>
               </div>
             </div>

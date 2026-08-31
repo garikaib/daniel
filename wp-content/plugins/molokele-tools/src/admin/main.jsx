@@ -1365,10 +1365,10 @@ function App() {
                     <Save className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label
                     className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      settings.hero_display_mode !== 'alternative'
+                      settings.hero_display_mode === 'current' || (!settings.hero_display_mode || (settings.hero_display_mode !== 'alternative' && settings.hero_display_mode !== 'minimal'))
                         ? 'border-[#044D29] bg-[#044D29]/5'
                         : 'border-slate-200 hover:border-slate-300'
                     }`}
@@ -1377,7 +1377,7 @@ function App() {
                       type="radio"
                       name="hero_display_mode"
                       className="mt-1 h-4 w-4 text-[#044D29] focus:ring-[#044D29]"
-                      checked={settings.hero_display_mode !== 'alternative'}
+                      checked={settings.hero_display_mode === 'current' || (!settings.hero_display_mode || (settings.hero_display_mode !== 'alternative' && settings.hero_display_mode !== 'minimal'))}
                       onChange={() => setSettings({ ...settings, hero_display_mode: 'current' })}
                     />
                     <span>
@@ -1405,6 +1405,27 @@ function App() {
                       <span className="block text-xs font-black uppercase tracking-wider text-slate-900">Alternative</span>
                       <span className="block text-[11px] text-slate-500 mt-0.5">
                         Editorial gallery slideshow — glass placard, spec-sheet meta row, thumbnail rail.
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      settings.hero_display_mode === 'minimal'
+                        ? 'border-[#044D29] bg-[#044D29]/5'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="hero_display_mode"
+                      className="mt-1 h-4 w-4 text-[#044D29] focus:ring-[#044D29]"
+                      checked={settings.hero_display_mode === 'minimal'}
+                      onChange={() => setSettings({ ...settings, hero_display_mode: 'minimal' })}
+                    />
+                    <span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-slate-900">Minimalist</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">
+                        Sleek low-profile bottom ribbon with collapsible/minimizable text for clear photo viewing.
                       </span>
                     </span>
                   </label>
