@@ -67,12 +67,8 @@ export default function HeroMinimal({
       {/* Crossfade Slides */}
       {slides.map((slide, i) => {
         const url = slideImage(slide, i);
-        const posClass =
-          slide.position === 'bg-top'
-            ? 'object-top'
-            : slide.position === 'bg-bottom'
-            ? 'object-bottom'
-            : 'object-[center_35%]';
+        const focalX = Number.isFinite(slide.focal_x) ? slide.focal_x : 50;
+        const focalY = Number.isFinite(slide.focal_y) ? slide.focal_y : 50;
         const isActive = i === currentSlide;
 
         return (
@@ -94,7 +90,8 @@ export default function HeroMinimal({
                 fetchPriority={i === 0 ? 'high' : 'auto'}
                 loading={i === 0 ? 'eager' : 'lazy'}
                 decoding="async"
-                className={`absolute inset-0 w-full h-full object-cover ${posClass}`}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: `${focalX}% ${focalY}%` }}
               />
             </div>
           </div>

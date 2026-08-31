@@ -16,8 +16,8 @@ const sections = [
       "As a public health advocate long before he was a legislator, Hon. Molokele has made mental health one of his defining causes in Parliament — exposing the overcrowding and chronic underfunding at Ingutsheni Mental Hospital, and pushing for stigma to be confronted head-on rather than legislated around.",
       'He has called for mental health institutions to be separated from drug rehabilitation services, for the Social Welfare Department to be properly resourced, and for next year\'s budget to significantly increase allocations to mental health care. On maternal health, he has pressed the Ministry on bribery in access to services and demanded that health-related taxes — on food, tobacco, sugar, mobile data — actually be ring-fenced for healthcare instead of vanishing into general revenue.',
     ],
-    imageSlug: 'daniel_profile_public_14',
-    imageAlt: 'Hon. Molokele at a Pan-African parliamentary health sector summit',
+    imageSlug: 'danielmolokele_1761753583_3754183616390299264_1392651648',
+    imageAlt: 'Hon. Molokele hosting a mental health symposium',
   },
   {
     id: 'gender-equality-womens-rights',

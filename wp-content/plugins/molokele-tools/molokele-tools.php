@@ -319,6 +319,8 @@ function molokele_tools_default_hero_slides() {
 			'image'       => '',
 			'image_id'    => 0,
 			'position'    => 'bg-top',
+			'focal_x'     => 50,
+			'focal_y'     => 50,
 			'badge'       => 'Legislative Leadership',
 			'title'       => 'Parliamentary Action',
 			'description' => "Advocating for Whange Central in the National Assembly through key debates and workers' rights legislation.",
@@ -330,6 +332,8 @@ function molokele_tools_default_hero_slides() {
 			'image'       => '',
 			'image_id'    => 0,
 			'position'    => 'bg-center',
+			'focal_x'     => 50,
+			'focal_y'     => 50,
 			'badge'       => 'Constituency Growth',
 			'title'       => 'Community Empowerment',
 			'description' => 'Auditing developments and overseeing local projects through transparent CDF initiatives.',
@@ -341,6 +345,8 @@ function molokele_tools_default_hero_slides() {
 			'image'       => '',
 			'image_id'    => 0,
 			'position'    => 'bg-center',
+			'focal_x'     => 50,
+			'focal_y'     => 50,
 			'badge'       => 'Leadership Legacy',
 			'title'       => 'A Vision for Whange',
 			'description' => 'Championing mining and environmental protection policies to safeguard community livelihoods.',
@@ -350,11 +356,38 @@ function molokele_tools_default_hero_slides() {
 	);
 }
 
+/**
+ * Older saved slides only carry the coarse 'position' bucket (top/center/
+ * bottom). Derive a starting focal point from it so the frontend can render
+ * with the precise focal_x/focal_y model immediately, before anyone opens
+ * the admin screen to fine-tune it.
+ */
+function molokele_tools_derive_focal_point( $slide ) {
+	$focal_x = isset( $slide['focal_x'] ) && is_numeric( $slide['focal_x'] ) ? max( 0, min( 100, floatval( $slide['focal_x'] ) ) ) : null;
+	$focal_y = isset( $slide['focal_y'] ) && is_numeric( $slide['focal_y'] ) ? max( 0, min( 100, floatval( $slide['focal_y'] ) ) ) : null;
+
+	if ( null === $focal_x ) {
+		$focal_x = 50;
+	}
+
+	if ( null === $focal_y ) {
+		$focal_y = 'bg-top' === ( $slide['position'] ?? '' ) ? 15 : ( 'bg-bottom' === ( $slide['position'] ?? '' ) ? 85 : 50 );
+	}
+
+	return array( $focal_x, $focal_y );
+}
+
 function molokele_tools_get_hero_slides() {
 	$slides = get_option( 'molokele_hero_slides', null );
 	if ( ! is_array( $slides ) || empty( $slides ) ) {
 		$slides = molokele_tools_default_hero_slides();
 	}
+
+	foreach ( $slides as &$slide ) {
+		list( $slide['focal_x'], $slide['focal_y'] ) = molokele_tools_derive_focal_point( $slide );
+	}
+	unset( $slide );
+
 	return rest_ensure_response( $slides );
 }
 
@@ -369,6 +402,7 @@ function molokele_tools_save_hero_slides( $request ) {
 		if ( ! is_array( $slide ) ) {
 			continue;
 		}
+		list( $focal_x, $focal_y ) = molokele_tools_derive_focal_point( $slide );
 		$clean[] = array(
 			'id'          => sanitize_text_field( $slide['id'] ?? uniqid( 'slide-' ) ),
 			'image'       => esc_url_raw( $slide['image'] ?? '' ),
@@ -376,6 +410,8 @@ function molokele_tools_save_hero_slides( $request ) {
 			'position'    => in_array( $slide['position'] ?? '', array( 'bg-top', 'bg-center', 'bg-bottom' ), true )
 				? $slide['position']
 				: 'bg-center',
+			'focal_x'     => $focal_x,
+			'focal_y'     => $focal_y,
 			'badge'       => sanitize_text_field( $slide['badge'] ?? '' ),
 			'title'       => sanitize_text_field( $slide['title'] ?? '' ),
 			'description' => sanitize_textarea_field( $slide['description'] ?? '' ),

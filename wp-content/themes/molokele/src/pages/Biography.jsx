@@ -52,7 +52,7 @@ const timeline = [
     year: '2018',
     icon: Vote,
     title: 'Whange Central Elects Its MP',
-    imageSlug: 'daniel_profile_public_22',
+    imageSlug: '785288024_10165529318904282_5261809633193675246_n',
     imageAlt: 'Hon. Molokele supporting community outreach and food security in Whange',
     body: 'He is elected Member of Parliament for Whange Central — the seat that turns a career of organising for other people\'s causes into direct responsibility for his own community\'s.',
   },

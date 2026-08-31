@@ -74,11 +74,8 @@ export default function HeroEditorial({
       {/* Dissolve slides */}
       {slides.map((slide, i) => {
         const url = slideImage(slide, i);
-        const posClass = slide.position === 'bg-top'
-          ? 'object-top'
-          : slide.position === 'bg-bottom'
-            ? 'object-bottom'
-            : 'object-[75%_35%]';
+        const focalX = Number.isFinite(slide.focal_x) ? slide.focal_x : 50;
+        const focalY = Number.isFinite(slide.focal_y) ? slide.focal_y : 50;
         const isActive = i === currentSlide;
 
         return (
@@ -96,7 +93,8 @@ export default function HeroEditorial({
               <img
                 src={url}
                 alt=""
-                className={`absolute inset-0 w-full h-full object-cover ${posClass}`}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: `${focalX}% ${focalY}%` }}
               />
             </div>
 

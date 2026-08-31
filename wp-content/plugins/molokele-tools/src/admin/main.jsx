@@ -60,6 +60,8 @@ const BLANK_SLIDE = () => ({
   image: '',
   image_id: 0,
   position: 'bg-center',
+  focal_x: 50,
+  focal_y: 50,
   badge: '',
   title: '',
   description: '',
@@ -1460,7 +1462,10 @@ function App() {
                       <img
                         src={activeHeroSlide.image}
                         alt=""
-                        className={`absolute inset-0 w-full h-full object-cover opacity-70 ${activeHeroSlide.position}`}
+                        className="absolute inset-0 w-full h-full object-cover opacity-70"
+                        style={{
+                          objectPosition: `${activeHeroSlide.focal_x ?? 50}% ${activeHeroSlide.focal_y ?? 50}%`,
+                        }}
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-r from-black via-slate-900 to-[#044D29]/60 opacity-80" />
@@ -1599,11 +1604,37 @@ function App() {
                           {isExpanded && (
                             <div className="p-5 border-t border-slate-100 bg-white space-y-5 animate-molokele-fade-in">
                               
-                              {/* Image Selection Bar */}
+                              {/* Image Selection Bar + Focal Point Picker */}
                               <div className="flex items-start gap-4">
-                                <div className="h-24 w-36 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-300 shadow-inner">
+                                <div
+                                  className={`relative h-24 w-36 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-300 shadow-inner ${
+                                    slide.image ? 'cursor-crosshair' : ''
+                                  }`}
+                                  title={slide.image ? 'Click where the subject is — that spot stays in frame when the hero crops this photo' : ''}
+                                  onClick={(e) => {
+                                    if (!slide.image) return;
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                                    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+                                    updateSlide(slide.id, {
+                                      focal_x: Math.max(0, Math.min(100, x)),
+                                      focal_y: Math.max(0, Math.min(100, y)),
+                                    });
+                                  }}
+                                >
                                   {slide.image ? (
-                                    <img src={slide.image} alt="" className="h-full w-full object-cover" />
+                                    <>
+                                      <img
+                                        src={slide.image}
+                                        alt=""
+                                        className="h-full w-full object-cover pointer-events-none"
+                                        style={{ objectPosition: `${slide.focal_x ?? 50}% ${slide.focal_y ?? 50}%` }}
+                                      />
+                                      <span
+                                        className="absolute h-3 w-3 -ml-1.5 -mt-1.5 rounded-full border-2 border-white bg-[#C8102E] shadow pointer-events-none"
+                                        style={{ left: `${slide.focal_x ?? 50}%`, top: `${slide.focal_y ?? 50}%` }}
+                                      />
+                                    </>
                                   ) : (
                                     <div className="h-full w-full flex items-center justify-center text-slate-400">
                                       <ImagePlus className="h-6 w-6" />
@@ -1628,7 +1659,7 @@ function App() {
                                     </button>
                                   )}
                                   <p className="text-[10px] text-slate-500 max-w-xs leading-relaxed">
-                                    Landscape 16:9 (1920×1080) or 16:7 (1920×840) works best.
+                                    Landscape 16:9 (1920×1080) or 16:7 (1920×840) works best. Click the thumbnail on the subject to set the focal point kept in frame.
                                   </p>
                                 </div>
                               </div>
@@ -1674,17 +1705,38 @@ function App() {
                                 </div>
                                 <div className="space-y-1.5">
                                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                                    Image Focus Point
+                                    Focal Point (H% / V%)
                                   </label>
-                                  <select
-                                    value={slide.position}
-                                    onChange={(e) => updateSlide(slide.id, { position: e.target.value })}
-                                    className={REPEATER_INPUT_CLASS}
-                                  >
-                                    <option value="bg-top">Top</option>
-                                    <option value="bg-center">Center</option>
-                                    <option value="bg-bottom">Bottom</option>
-                                  </select>
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      value={Math.round(slide.focal_x ?? 50)}
+                                      onChange={(e) =>
+                                        updateSlide(slide.id, {
+                                          focal_x: Math.max(0, Math.min(100, Number(e.target.value))),
+                                        })
+                                      }
+                                      className={REPEATER_INPUT_CLASS}
+                                    />
+                                    <span className="text-slate-400 text-xs font-black">/</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      value={Math.round(slide.focal_y ?? 50)}
+                                      onChange={(e) =>
+                                        updateSlide(slide.id, {
+                                          focal_y: Math.max(0, Math.min(100, Number(e.target.value))),
+                                        })
+                                      }
+                                      className={REPEATER_INPUT_CLASS}
+                                    />
+                                  </div>
+                                  <p className="text-[10px] text-slate-500">
+                                    Or click the photo thumbnail to set it visually.
+                                  </p>
                                 </div>
                               </div>
 
