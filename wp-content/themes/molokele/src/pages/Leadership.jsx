@@ -13,7 +13,6 @@ const parliamentRoles = [
 ];
 
 const partyRoles = [
-  { title: 'Interim Treasurer General', detail: 'Citizens Coalition for Change (CCC)' },
   { title: 'Overall Chairperson', detail: 'CCC Whange Cluster' },
   { title: 'Former Deputy Treasurer General', detail: 'MDC Alliance (2020–2022)' },
   { title: 'Former National Spokesperson', detail: 'MDC Alliance (2019–2020)' },

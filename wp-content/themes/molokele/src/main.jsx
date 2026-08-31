@@ -1,21 +1,22 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Home from './pages/Home.jsx';
-import About from './pages/About.jsx';
-import Biography from './pages/Biography.jsx';
-import Leadership from './pages/Leadership.jsx';
-import Family from './pages/Family.jsx';
-import InParliament from './pages/InParliament.jsx';
-import NewsMedia from './pages/NewsMedia.jsx';
-import Contact from './pages/Contact.jsx';
-import CdfTracker from './pages/CdfTracker.jsx';
-import SinglePost from './pages/SinglePost.jsx';
-import GenericPage from './pages/GenericPage.jsx';
-import NotFound from './pages/NotFound.jsx';
 import initPageTransitions from './PageLoader.jsx';
 import './index.css';
+
+const About = lazy(() => import('./pages/About.jsx'));
+const Biography = lazy(() => import('./pages/Biography.jsx'));
+const Leadership = lazy(() => import('./pages/Leadership.jsx'));
+const Family = lazy(() => import('./pages/Family.jsx'));
+const InParliament = lazy(() => import('./pages/InParliament.jsx'));
+const NewsMedia = lazy(() => import('./pages/NewsMedia.jsx'));
+const Contact = lazy(() => import('./pages/Contact.jsx'));
+const CdfTracker = lazy(() => import('./pages/CdfTracker.jsx'));
+const SinglePost = lazy(() => import('./pages/SinglePost.jsx'));
+const GenericPage = lazy(() => import('./pages/GenericPage.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 const headerRoot = document.getElementById('molokele-header-root');
 if (headerRoot) {
@@ -78,7 +79,11 @@ if (root) {
     PageComponent = Home;
   }
 
-  createRoot(root).render(<PageComponent />);
+  createRoot(root).render(
+    <Suspense fallback={<div className="min-h-[60vh] bg-[#FAF9F5] dark:bg-[#090D14]" />}>
+      <PageComponent />
+    </Suspense>
+  );
 }
 
 // Fade the branded preloader out now that the app has mounted, and re-arm it

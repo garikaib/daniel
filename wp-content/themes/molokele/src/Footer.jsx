@@ -33,22 +33,6 @@ function XIcon(props) {
   );
 }
 
-function BlueskyIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M12 10.8C10.7 8.3 7.4 3.6 4.3 1.3 1.3-.9.2.4 0 1.2c-.2.8-.2 4.2 0 5.2.4 2 2.5 2.6 4.6 2.3-3.4.5-6.3 1.9-2.4 6.2C6.6 20 8.7 15.9 12 10.8c3.3 5.1 5.4 9.2 9.8 4.1 3.9-4.3 1-5.7-2.4-6.2 2.1.3 4.2-.3 4.6-2.3.2-1 .2-4.4 0-5.2C23.8.4 22.7-.9 19.7 1.3c-3.1 2.3-6.4 7-7.7 9.5z" />
-    </svg>
-  );
-}
-
-function YoutubeIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.518 3.5 12 3.5 12 3.5s-7.518 0-9.388.555a3.003 3.003 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.482 20.5 12 20.5 12 20.5s7.518 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-    </svg>
-  );
-}
-
 function InstagramIcon(props) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -58,11 +42,9 @@ function InstagramIcon(props) {
 }
 
 const socialLinks = [
-  { label: 'Facebook', url: 'https://facebook.com', Icon: FacebookIcon },
-  { label: 'X', url: 'https://x.com', Icon: XIcon },
-  { label: 'Bluesky', url: 'https://bsky.app', Icon: BlueskyIcon },
-  { label: 'YouTube', url: 'https://youtube.com', Icon: YoutubeIcon },
-  { label: 'Instagram', url: 'https://instagram.com', Icon: InstagramIcon },
+  { label: 'Facebook', url: 'https://www.facebook.com/daniel.molokele', Icon: FacebookIcon },
+  { label: 'X (Twitter)', url: 'https://x.com/molokele', Icon: XIcon },
+  { label: 'Instagram', url: 'https://www.instagram.com/danielmolokele/', Icon: InstagramIcon },
 ];
 
 function FooterNavColumn({ title, links, accentDotClass, headerColorClass }) {
@@ -118,7 +100,7 @@ export default function Footer() {
               <ZimbabweMap className="h-11 w-auto text-white flex-shrink-0" highlightClassName="fill-[#DCA11D]" />
               <div className="flex flex-col justify-center leading-none">
                 <span className="font-sans font-black uppercase tracking-tight text-lg text-white">
-                  Hon. Molokele
+                  Hon. Daniel Molokele
                 </span>
                 <span className="font-sans font-bold uppercase tracking-[0.2em] text-[10px] text-white/60 mt-1.5">
                   MP <span className="text-[#DCA11D] font-black">Whange Central</span>

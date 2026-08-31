@@ -49,20 +49,6 @@ function XIcon(props) {
     </svg>
   );
 }
-function BlueskyIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 512 512">
-      <path d="M111.8 77.2C167.3 117.7 220 183 256 233.1c36-50.1 88.7-115.4 144.2-155.9C448.2 42.1 512 16.5 512 79.7c0 12.3-5.2 92.5-8.3 108.3-9.5 49.3-58.4 62.1-102.5 53.6 77.3 14.8 96 61.4 53.9 108.3-43 47.9-106 18.2-161.4-23-11.4-8.5-22.7-17.7-33.7-27.4-11 9.7-22.3 18.9-33.7 27.4-55.4 41.2-118.4 70.9-161.4 23-42.1-46.9-23.4-93.5 53.9-108.3-44.1 8.5-93-4.3-102.5-53.6C5.2 172.2 0 92 0 79.7 0 16.5 63.8 42.1 111.8 77.2z" />
-    </svg>
-  );
-}
-function YoutubeIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24">
-      <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.518 3.5 12 3.5 12 3.5s-7.518 0-9.388.555a3.003 3.003 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.482 20.5 12 20.5 12 20.5s7.518 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-    </svg>
-  );
-}
 function InstagramIcon(props) {
   return (
     <svg {...props} viewBox="0 0 24 24">
@@ -72,11 +58,9 @@ function InstagramIcon(props) {
 }
 
 const SOCIAL_LINKS = [
-  { label: 'Facebook', url: 'https://facebook.com', Icon: FacebookIcon, iconClass: 'h-4 w-4' },
-  { label: 'X', url: 'https://x.com', Icon: XIcon, iconClass: 'h-3.5 w-3.5' },
-  { label: 'Bluesky', url: 'https://bsky.app', Icon: BlueskyIcon, iconClass: 'h-3.5 w-3.5' },
-  { label: 'YouTube', url: 'https://youtube.com', Icon: YoutubeIcon, iconClass: 'h-4 w-4' },
-  { label: 'Instagram', url: 'https://instagram.com', Icon: InstagramIcon, iconClass: 'h-4 w-4' },
+  { label: 'Facebook', url: 'https://www.facebook.com/daniel.molokele', Icon: FacebookIcon, iconClass: 'h-4 w-4' },
+  { label: 'X (Twitter)', url: 'https://x.com/molokele', Icon: XIcon, iconClass: 'h-3.5 w-3.5' },
+  { label: 'Instagram', url: 'https://www.instagram.com/danielmolokele/', Icon: InstagramIcon, iconClass: 'h-4 w-4' },
 ];
 
 function SocialIcons({ variant = 'ribbon' }) {
@@ -286,7 +270,7 @@ export default function Header() {
           />
           <div className="flex flex-col justify-center leading-none min-w-0">
             <span className="font-sans font-black uppercase tracking-tight text-sm sm:text-base truncate text-white">
-              Hon. Molokele
+              Hon. Daniel Molokele
             </span>
             <span className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] sm:text-[10px] truncate mt-1.5 text-white/70">
               MP{' '}

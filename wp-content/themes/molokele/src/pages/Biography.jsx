@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Baby, School, Scale, Users, Heart, Landmark, Vote, Globe2, Sparkles, ArrowRight } from 'lucide-react';
+import { Baby, School, Scale, Users, Heart, Landmark, Vote, Globe2, Compass, ArrowRight } from 'lucide-react';
 import { useGalleryImages, findBySlug } from '../lib/wpMedia.js';
 import FlagStripe from '../lib/FlagStripe.jsx';
 
@@ -38,6 +38,8 @@ const timeline = [
     title: 'Reclaiming the Name',
     imageSlug: 'daniel_profile_public_30',
     imageAlt: 'Portrait of Godfrey Majahana Mguni, Hon. Molokele\'s father',
+    aspectRatio: 'aspect-[3/4] sm:aspect-[4/5]',
+    objectPosition: 'object-cover object-center',
     body: 'He legally changes his name from Fortune Mguni to Fortune Daniel Molokela-Tsiye, reuniting with the Batsieng clan in Mahikeng, South Africa — restoring a family identity that history had worn away. In honour of his father, Godfrey Majahana Mguni, a career trade unionist and Workers Committee Chairperson at the Whange mine from 1979 to 1994.',
   },
   {
@@ -64,9 +66,9 @@ const timeline = [
   },
   {
     year: 'Today',
-    icon: Sparkles,
+    icon: Compass,
     title: 'Still Building',
-    body: 'Interim Treasurer General of the Citizens Coalition for Change and Overall Chairperson of its Whange Cluster. A seat on the International Executive Committee of Parliamentarians for Global Action. A place on the Global Board of the UNITE Parliamentary Network for Global Health. Still the same boy from No. 1 Colliery.',
+    body: 'Overall Chairperson of the CCC Whange Cluster. A seat on the International Executive Committee of Parliamentarians for Global Action. A place on the Global Board of the UNITE Parliamentary Network for Global Health. Still the same boy from No. 1 Colliery.',
   },
 ];
 
@@ -187,7 +189,7 @@ export default function Biography() {
                         <img
                           src={entryImg.url}
                           alt={entry.imageAlt}
-                          className="w-full aspect-[4/3] object-cover object-top bg-slate-100 dark:bg-white/5 group-hover:scale-105 transition-transform duration-500"
+                          className={`w-full ${entry.aspectRatio || 'aspect-[4/3]'} ${entry.objectPosition || 'object-cover object-top'} bg-slate-100 dark:bg-white/5 group-hover:scale-105 transition-transform duration-500`}
                           loading="lazy"
                         />
                       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Users, Goal, Home as HomeIcon, Shirt, Award, BookOpen, GraduationCap } from 'lucide-react';
+import { Users, Goal, Home as HomeIcon, Award, BookOpen, GraduationCap, Landmark } from 'lucide-react';
 import { useGalleryImages, findBySlug } from '../lib/wpMedia.js';
 import ZimbabweMap from '../lib/ZimbabweMap.jsx';
 import FlagStripe from '../lib/FlagStripe.jsx';
@@ -23,21 +23,16 @@ const family = [
     directImage: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp'
   },
   { 
-    name: 'The Mguni Brothers', 
-    relation: 'Brothers', 
-    note: 'Skyline FC founder, and the late Sibonginkosi "Boxer" Mguni — carrying forward the family legacy of sports administration.', 
-    icon: Shirt, 
+    name: 'The Batsieng Heritage', 
+    relation: 'Ancestral Lineage', 
+    note: 'Connected to the Batsieng clan in Mahikeng — reclaiming his ancestral name Fortune Daniel Molokela-Tsiye in honour of family history.', 
+    icon: Landmark, 
     photoSlug: null,
     directImage: null
   },
 ];
 
 const motherPhotos = [
-  {
-    src: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp',
-    title: 'Mrs Jane Mpofu',
-    subtitle: 'Pre-school educator & community pillar'
-  },
   {
     src: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_01.webp',
     title: 'International Leadership University',
@@ -49,17 +44,12 @@ const motherPhotos = [
     subtitle: 'Faith-based leadership & education'
   },
   {
-    src: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_02.webp',
-    title: 'Family & Community Fellowship',
-    subtitle: 'Mentoring future generations'
-  },
-  {
     src: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_04.webp',
     title: 'Leadership Recognition',
     subtitle: 'Honouring a lifetime of dedicated teaching'
   },
   {
-    src: '/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_05.webp',
+    src: '/wp-content/uploads/2026/08/1a4a6701-3f37-4f1b-a128-593fd0d297da.jpeg',
     title: 'ILU Academic Celebration',
     subtitle: 'Commitment to lifelong learning'
   }
@@ -211,19 +201,22 @@ export default function Family() {
       {/* The House That Raised Him */}
       <section
         ref={registerReveal}
-        className="molokele-card-reveal mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
+        className="molokele-card-reveal bg-[#090D14] text-white py-20 sm:py-28 border-y border-[#DCA11D]/30 relative overflow-hidden"
       >
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-start">
-          <div className="md:col-span-3 space-y-6">
+        {/* Faint editorial gridline texture */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl space-y-6 mb-12">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink to-brand-orange text-white shadow-md shadow-brand-pink/20">
                 <BookOpen className="h-5 w-5" />
               </div>
-              <h2 className="font-sans font-black text-xl sm:text-2xl uppercase tracking-wide text-brand-blue dark:text-white">
+              <h2 className="font-sans font-black text-xl sm:text-2xl uppercase tracking-wide text-white">
                 The House That Raised Him
               </h2>
             </div>
-            <div className="font-serif text-base sm:text-lg text-slate-600 dark:text-white/70 leading-relaxed space-y-4">
+            <div className="font-serif text-base sm:text-lg text-white/80 leading-relaxed space-y-4">
               <p>
                 His father, the late <strong>Godfrey Majahana Mguni</strong>, was a career trade unionist — Workers
                 Committee Chairperson at the Whange mine from 1979 to 1994, and a leading figure in
@@ -238,25 +231,40 @@ export default function Family() {
             </div>
           </div>
 
-          <div className="md:col-span-2 space-y-4">
-            <div className="overflow-hidden rounded-xl border border-brand-sand dark:border-white/10 shadow-md group">
-              <img {...img('daniel_profile_public_30', "Portrait of Godfrey Majahana Mguni, Hon. Molokele's father")} className="w-full aspect-[4/5] object-cover object-top bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-              <div className="px-4 py-3 bg-white dark:bg-brand-blue border-t border-slate-100 dark:border-white/10">
-                <p className="font-sans text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white">
+          {/* Side-by-side portraits in a balanced horizontal row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl">
+            <div className="overflow-hidden rounded-xl border border-white/15 bg-white/5 backdrop-blur-md shadow-xl group hover:border-[#DCA11D]/40 transition-all duration-300">
+              <div className="aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-white/5">
+                <img
+                  {...img('daniel_profile_public_30', "Portrait of Godfrey Majahana Mguni, Hon. Molokele's father")}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+              <div className="px-5 py-4 bg-[#0c121e] border-t border-white/10">
+                <p className="font-sans text-xs font-black uppercase tracking-widest text-[#DCA11D]">
                   Godfrey Majahana Mguni
                 </p>
-                <p className="font-serif text-xs text-slate-500 dark:text-white/50 mt-0.5">
+                <p className="font-serif text-xs text-white/60 mt-1">
                   Workers Committee Chair, Whange Mine (1979–1994)
                 </p>
               </div>
             </div>
-            <div className="overflow-hidden rounded-xl border border-brand-sand dark:border-white/10 shadow-md group">
-              <img src="/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp" alt="Mrs Jane Mpofu" className="w-full aspect-[4/5] object-cover object-top bg-brand-sand dark:bg-white/5 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-              <div className="px-4 py-3 bg-white dark:bg-brand-blue border-t border-slate-100 dark:border-white/10">
-                <p className="font-sans text-[11px] font-black uppercase tracking-widest text-brand-blue dark:text-white">
+
+            <div className="overflow-hidden rounded-xl border border-white/15 bg-white/5 backdrop-blur-md shadow-xl group hover:border-[#DCA11D]/40 transition-all duration-300">
+              <div className="aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-white/5">
+                <img
+                  src="/wp-content/uploads/2026/08/mother_jane_mpofu_ilu_06.webp"
+                  alt="Mrs Jane Mpofu"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+              <div className="px-5 py-4 bg-[#0c121e] border-t border-white/10">
+                <p className="font-sans text-xs font-black uppercase tracking-widest text-[#DCA11D]">
                   Mrs Jane Mpofu
                 </p>
-                <p className="font-serif text-xs text-slate-500 dark:text-white/50 mt-0.5">
+                <p className="font-serif text-xs text-white/60 mt-1">
                   Retired Educator &amp; Community Leader
                 </p>
               </div>
@@ -290,7 +298,7 @@ export default function Family() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {motherPhotos.map((photo, index) => (
               <div
                 key={index}
@@ -319,7 +327,7 @@ export default function Family() {
         </div>
       </section>
 
-      {/* Brothers, Football, and the Family Trade */}
+      {/* Sports, Community, and Civic Life */}
       <section
         ref={registerReveal}
         className="molokele-card-reveal bg-brand-blue text-white py-16 sm:py-20"
@@ -330,17 +338,11 @@ export default function Family() {
               <Goal className="h-5 w-5" />
             </div>
             <h2 className="font-sans font-black text-xl sm:text-2xl uppercase tracking-wide text-white">
-              Brothers, Football, and the Family Trade
+              Sports, Community, and the Beautiful Game
             </h2>
           </div>
           <p className="mt-6 font-serif text-base sm:text-lg text-white/70 leading-relaxed max-w-3xl">
-            Soccer and organising run through the whole family, not just Hon. Molokele. His father played
-            in and chaired the Zulu Royals Football Club under the Wankie Football Association. His
-            younger brother built on that legacy by founding Skyline Football Club under the
-            Lwendulu Football Association. His eldest brother, the late Sibonginkosi "Boxer" Mguni,
-            was a well-known local player and administrator in his own right. By the time Hon. Molokele
-            took up the chairmanship of the Arsenal FC Zimbabwe Supporters Association, he wasn't
-            starting a tradition — he was continuing one.
+            Soccer and civic organising have always been central to Hon. Molokele’s community ethos. Growing up in a coal-mining town where his father played in and chaired the Zulu Royals Football Club under the Wankie Football Association, he learned early that sports bridge social divides and unify communities. Today, as Chairperson of the Arsenal FC Zimbabwe Supporters Association and an active champion of grassroots athletics in Whange Central, he continues to advocate for youth recreation, sports development, and community empowerment.
           </p>
         </div>
       </section>

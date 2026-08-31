@@ -363,7 +363,7 @@ export default function About() {
                   As National Spokesperson and later Deputy Treasurer General of the MDC Alliance, Hon. Molokele held a central role in articulating the movement's policy positions and representing its national executive to global and local news networks.
                 </p>
                 <p>
-                  He went on to serve as interim Treasurer General of the Citizens Coalition for Change (CCC) and the Overall Chairperson of its Whange Cluster, coordinating constituencies, mobilising local structures, and leading campaign logistics in Whange.
+                  He went on to serve as the Overall Chairperson of the CCC Whange Cluster, coordinating constituencies, mobilising local structures, and leading campaign logistics in Whange.
                 </p>
               </div>
             </div>
