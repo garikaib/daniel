@@ -52,7 +52,7 @@ const timeline = [
     year: '2018',
     icon: Vote,
     title: 'Whange Central Elects Its MP',
-    imageSlug: '785288024_10165529318904282_5261809633193675246_n',
+    imageSlug: 'daniel_profile_public_22',
     imageAlt: 'Hon. Molokele supporting community outreach and food security in Whange',
     body: 'He is elected Member of Parliament for Whange Central — the seat that turns a career of organising for other people\'s causes into direct responsibility for his own community\'s.',
   },
@@ -68,6 +68,8 @@ const timeline = [
     year: 'Today',
     icon: Compass,
     title: 'Still Building',
+    imageSlug: '785288024_10165529318904282_5261809633193675246_n',
+    imageAlt: 'Hon. Molokele continuing his constituency leadership and international work',
     body: 'Overall Chairperson of the CCC Whange Cluster. A seat on the International Executive Committee of Parliamentarians for Global Action. A place on the Global Board of the UNITE Parliamentary Network for Global Health. Still the same boy from No. 1 Colliery.',
   },
 ];

@@ -131,25 +131,25 @@ export default function HeroMinimal({
       <div className="relative z-10" />
 
       {/* Bottom Area: Ultra-Minimal Flag Badge (Left) + Slider Navigation & Flag-Gradient Timer (Right) */}
-      <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full pb-20 sm:pb-24 md:pb-28">
-        <div className="flex items-end justify-between gap-4">
+      <div className="relative z-20 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 w-full pb-16 sm:pb-24 md:pb-28">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
           
           {/* ── Left Bottom: Flag-Accented Minimal Category Badge ── */}
           <div
             key={currentSlide}
-            className="inline-flex items-center animate-in fade-in slide-in-from-bottom-2 duration-300 select-none mb-1 sm:mb-2"
+            className="inline-flex items-center self-start animate-in fade-in slide-in-from-bottom-2 duration-300 select-none mb-0.5 sm:mb-2"
           >
-            <div className="relative overflow-hidden rounded-full p-[1px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] shadow-xl">
-              <div className="flex items-center gap-2 bg-[#090D14]/90 backdrop-blur-xl px-3 py-1.5 rounded-full">
+            <div className="relative overflow-hidden rounded-full p-[1px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] shadow-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-[#090D14]/90 backdrop-blur-xl px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full">
                 {/* 3-stripe micro flag bar */}
-                <div className="flex flex-col gap-[2px] w-[3px] h-3 rounded-full overflow-hidden flex-shrink-0">
+                <div className="flex flex-col gap-[1.5px] sm:gap-[2px] w-[2.5px] sm:w-[3px] h-2.5 sm:h-3 rounded-full overflow-hidden flex-shrink-0">
                   <span className="h-1 w-full bg-[#044D29]" />
                   <span className="h-1 w-full bg-[#DCA11D]" />
                   <span className="h-1 w-full bg-[#C8102E]" />
                 </div>
                 
-                <span className="inline-flex items-center gap-1.25 text-[9.5px] font-black tracking-[0.18em] text-[#DCA11D] uppercase">
-                  <ShieldCheck className="h-3 w-3 text-[#3FBF72]" />
+                <span className="inline-flex items-center gap-1 sm:gap-1.25 text-[8.5px] sm:text-[9.5px] font-black tracking-[0.14em] sm:tracking-[0.18em] text-[#DCA11D] uppercase">
+                  <ShieldCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#3FBF72]" />
                   {categoryBadge}
                 </span>
               </div>
@@ -158,27 +158,27 @@ export default function HeroMinimal({
 
           {/* ── Right Bottom: Slider Dock (Timer, Controls, Thumbnails & Counter) ── */}
           {slides.length > 1 && (
-            <div className="flex flex-col gap-2 ml-auto flex-shrink-0">
+            <div className="flex flex-col gap-1.5 sm:gap-2 sm:ml-auto w-full sm:w-auto flex-shrink-0">
               <div
                 onMouseMove={(e) => setDockMouseX(e.clientX)}
                 onMouseLeave={() => setDockMouseX(null)}
-                className="relative overflow-visible flex items-center gap-3 rounded-2xl border border-[#DCA11D]/30 bg-[#090D14]/85 backdrop-blur-xl px-3.5 py-2 shadow-2xl"
+                className="relative overflow-visible flex items-center justify-between sm:justify-start gap-1.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-[#DCA11D]/30 bg-[#090D14]/85 backdrop-blur-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-2xl"
               >
                 {/* Top Signature Flag Accent Line */}
-                <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] pointer-events-none" />
+                <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] pointer-events-none" />
 
                 {/* PREV Text Button */}
                 <button
                   onClick={goPrevSlide}
                   aria-label="Previous slide"
-                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-2 py-1 rounded transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="h-3 w-3 text-[#DCA11D]" />
-                  Prev
+                  <ChevronLeft className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#DCA11D]" />
+                  <span className="hidden xs:inline">Prev</span>
                 </button>
 
                 {/* Thumbnails */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   {slides.map((slide, i) => {
                     const isActive = i === currentSlide;
                     const { transform, zIndex, dropShadow, eased } = thumbMetrics(i);
@@ -194,7 +194,7 @@ export default function HeroMinimal({
                         onClick={() => goToSlide(i)}
                         aria-label={`Go to slide ${i + 1}: ${slide.title}`}
                         style={{ zIndex }}
-                        className={`relative overflow-visible rounded-md w-11 h-8 sm:w-12 sm:h-9 transition-opacity duration-200 cursor-pointer ${
+                        className={`relative overflow-visible rounded-md w-8 h-6 sm:w-11 sm:h-8 md:w-12 md:h-9 transition-opacity duration-200 cursor-pointer ${
                           revealed ? 'opacity-100' : 'opacity-40 hover:opacity-80'
                         }`}
                       >
@@ -202,7 +202,7 @@ export default function HeroMinimal({
                           style={{ transform, filter: filterValue, transformOrigin: 'bottom center' }}
                           className={`relative block h-full w-full overflow-hidden rounded-md transition-[transform,filter] duration-200 ${
                             isActive
-                              ? 'ring-2 ring-[#DCA11D] shadow-[0_0_10px_rgba(220,161,29,0.35)]'
+                              ? 'ring-1.5 sm:ring-2 ring-[#DCA11D] shadow-[0_0_10px_rgba(220,161,29,0.35)]'
                               : 'border border-white/20 hover:border-[#DCA11D]/50'
                           }`}
                         >
@@ -213,7 +213,7 @@ export default function HeroMinimal({
                             loading="lazy"
                           />
                           {isActive && (
-                            <span className="absolute inset-x-0 bottom-0 h-[2.5px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
+                            <span className="absolute inset-x-0 bottom-0 h-[2px] sm:h-[2.5px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
                           )}
                         </span>
                       </button>
@@ -225,22 +225,22 @@ export default function HeroMinimal({
                 <button
                   onClick={goNextSlide}
                   aria-label="Next slide"
-                  className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-2 py-1 rounded transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded transition-colors cursor-pointer"
                 >
-                  Next
-                  <ChevronRight className="h-3 w-3 text-[#DCA11D]" />
+                  <span className="hidden xs:inline">Next</span>
+                  <ChevronRight className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#DCA11D]" />
                 </button>
 
                 {/* Numbered Counter with Parliament Accent */}
                 <div
                   key={currentSlide}
-                  className="pl-3 ml-1 border-l border-white/15 text-right select-none animate-in fade-in duration-200"
+                  className="pl-2 sm:pl-3 ml-0.5 sm:ml-1 border-l border-white/15 text-right select-none animate-in fade-in duration-200"
                 >
                   <div className="font-mono leading-none text-white">
-                    <span className="text-base sm:text-lg font-black text-[#DCA11D] tabular-nums">
+                    <span className="text-sm sm:text-base md:text-lg font-black text-[#DCA11D] tabular-nums">
                       {String(currentSlide + 1).padStart(2, '0')}
                     </span>
-                    <span className="text-[11px] text-white/50 ml-0.5">
+                    <span className="text-[10px] sm:text-[11px] text-white/50 ml-0.5">
                       /{String(slides.length).padStart(2, '0')}
                     </span>
                   </div>
@@ -248,7 +248,7 @@ export default function HeroMinimal({
               </div>
 
               {/* Real-time rAF Progress Bar Timeline in Signature Flag Gradient */}
-              <div className="h-[3px] w-full bg-white/15 overflow-hidden rounded-full">
+              <div className="h-[2px] sm:h-[3px] w-full bg-white/15 overflow-hidden rounded-full">
                 <div
                   className="h-full bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]"
                   style={{ width: `${slideProgress * 100}%`, transition: 'none' }}
