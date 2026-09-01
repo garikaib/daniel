@@ -430,7 +430,7 @@ export default function Header() {
             !isSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
           }`}
         >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <div className="ml-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative">
             {/* Slanted Parliamentary Ebony background wedge starting just to the left of Parliament badge and extending to the right edge */}
             <div
               className="absolute top-0 bottom-0 left-[-20px] sm:left-[-28px] right-[-100vw] bg-[#090D14]/95 backdrop-blur-md border-t border-[#DCA11D]/40 shadow-lg"
