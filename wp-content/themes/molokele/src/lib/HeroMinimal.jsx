@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
 import ZimbabweMap from './ZimbabweMap.jsx';
 import FlagStripe from './FlagStripe.jsx';
@@ -23,29 +23,7 @@ export default function HeroMinimal({
   goToSlide,
   slideImage,
 }) {
-  const thumbRefs = useRef([]);
-  const [dockMouseX, setDockMouseX] = useState(null);
-
-  const thumbMetrics = (i) => {
-    const el = thumbRefs.current[i];
-    if (dockMouseX == null || !el) {
-      return { transform: 'translateY(0px) scale(1)', zIndex: 1, dropShadow: 'none', eased: 0 };
-    }
-    const rect = el.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const distance = dockMouseX - center;
-    const radius = 120;
-    const proximity = Math.max(0, 1 - Math.abs(distance) / radius);
-    const eased = proximity * proximity;
-    const scale = 1 + eased * 1.6;
-    const lift = eased * 24;
-    return {
-      transform: `translateY(-${lift.toFixed(1)}px) scale(${scale.toFixed(3)})`,
-      zIndex: Math.round(1 + eased * 30),
-      dropShadow: eased > 0.1 ? `drop-shadow(0 12px 14px rgba(0,0,0,0.6))` : 'none',
-      eased,
-    };
-  };
+  const [hoveredSlide, setHoveredSlide] = useState(null);
 
   const activeSlide = slides[currentSlide] || slides[0] || {};
   const categoryBadge = activeSlide.badge ? activeSlide.badge.split('|')[0].trim() : 'Leadership Legacy';
@@ -156,88 +134,111 @@ export default function HeroMinimal({
             </div>
           </div>
 
-          {/* ── Right Bottom: Slider Dock (Timer, Controls, Thumbnails & Counter) ── */}
+          {/* ── Right Bottom: Sleek Segmented Progress Pills & Minimal Controls ── */}
           {slides.length > 1 && (
-            <div className="flex flex-col gap-1.5 sm:gap-2 sm:ml-auto w-full sm:w-auto flex-shrink-0">
-              <div
-                onMouseMove={(e) => setDockMouseX(e.clientX)}
-                onMouseLeave={() => setDockMouseX(null)}
-                className="relative overflow-visible flex items-center justify-between sm:justify-start gap-1.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-[#DCA11D]/30 bg-[#090D14]/85 backdrop-blur-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-2xl"
-              >
+            <div className="sm:ml-auto w-full sm:w-auto flex-shrink-0">
+              <div className="relative overflow-visible flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2.5 rounded-full border border-[#DCA11D]/30 bg-[#090D14]/85 backdrop-blur-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-2xl">
                 {/* Top Signature Flag Accent Line */}
-                <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] pointer-events-none" />
+                <div className="absolute top-0 inset-x-4 h-[1.5px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] pointer-events-none" />
 
-                {/* PREV Text Button */}
+                {/* PREV Button */}
                 <button
                   onClick={goPrevSlide}
                   aria-label="Previous slide"
-                  className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded transition-colors cursor-pointer"
+                  className="group flex items-center justify-center h-6 w-6 sm:h-7 sm:w-7 rounded-full text-white/70 hover:text-[#DCA11D] hover:bg-white/10 active:scale-90 transition-all duration-200 cursor-pointer"
                 >
-                  <ChevronLeft className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#DCA11D]" />
-                  <span className="hidden xs:inline">Prev</span>
+                  <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
                 </button>
 
-                {/* Thumbnails */}
+                {/* Segmented Progress Pills */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   {slides.map((slide, i) => {
-                    const isActive = i === currentSlide;
-                    const { transform, zIndex, dropShadow, eased } = thumbMetrics(i);
-                    const revealed = isActive || eased > 0.1;
-                    const filterValue = revealed
-                      ? (dropShadow !== 'none' ? dropShadow : '')
-                      : 'grayscale(1)';
+                    const isPast = i < currentSlide;
+                    const isCurrent = i === currentSlide;
+                    const isHovered = hoveredSlide === i;
 
                     return (
-                      <button
+                      <div
                         key={slide.id || i}
-                        ref={(el) => (thumbRefs.current[i] = el)}
-                        onClick={() => goToSlide(i)}
-                        aria-label={`Go to slide ${i + 1}: ${slide.title}`}
-                        style={{ zIndex }}
-                        className={`relative overflow-visible rounded-md w-8 h-6 sm:w-11 sm:h-8 md:w-12 md:h-9 transition-opacity duration-200 cursor-pointer ${
-                          revealed ? 'opacity-100' : 'opacity-40 hover:opacity-80'
-                        }`}
+                        className="relative flex items-center"
+                        onMouseEnter={() => setHoveredSlide(i)}
+                        onMouseLeave={() => setHoveredSlide(null)}
                       >
-                        <span
-                          style={{ transform, filter: filterValue, transformOrigin: 'bottom center' }}
-                          className={`relative block h-full w-full overflow-hidden rounded-md transition-[transform,filter] duration-200 ${
-                            isActive
-                              ? 'ring-1.5 sm:ring-2 ring-[#DCA11D] shadow-[0_0_10px_rgba(220,161,29,0.35)]'
-                              : 'border border-white/20 hover:border-[#DCA11D]/50'
+                        {/* Micro-preview tooltip — always mounted so hide/show is a
+                            smooth crossfade instead of an instant pop in/out. */}
+                        <div
+                          className={`absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-28 sm:w-32 p-1.5 rounded-xl bg-[#090D14]/95 border border-[#DCA11D]/40 backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.8)] pointer-events-none z-50 select-none origin-bottom transition-all duration-200 ease-out ${
+                            isHovered
+                              ? 'opacity-100 scale-100 translate-y-0'
+                              : 'opacity-0 scale-90 translate-y-1.5'
                           }`}
                         >
-                          <img
-                            src={slideImage(slide, i)}
-                            alt=""
-                            className="h-full w-full object-cover"
-                            loading="lazy"
+                          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg">
+                            <img
+                              src={slideImage(slide, i)}
+                              alt=""
+                              className={`h-full w-full object-cover transition-transform duration-500 ease-out ${
+                                isHovered ? 'scale-100' : 'scale-110'
+                              }`}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/80 via-transparent to-transparent" />
+                          </div>
+                          <div className="mt-1 text-[8.5px] font-bold text-center text-[#DCA11D] uppercase tracking-wider truncate px-0.5">
+                            {slide.title || `Slide ${i + 1}`}
+                          </div>
+                          {/* Downward triangle caret */}
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#DCA11D]/40" />
+                        </div>
+
+                        {/* Interactive Pill Bar — width/colour/ring ease with a
+                            soft overshoot curve so growing into the active
+                            pill (or settling back down) feels springy rather
+                            than a linear resize. */}
+                        <button
+                          onClick={() => goToSlide(i)}
+                          aria-label={`Go to slide ${i + 1}: ${slide.title || ''}`}
+                          className={`relative h-2 sm:h-2.5 rounded-full overflow-hidden cursor-pointer transition-[width,background-color,box-shadow] duration-[450ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-y-125 ${
+                            isCurrent
+                              ? 'w-12 sm:w-16 bg-white/20 ring-1 ring-[#DCA11D]/50 shadow-[0_0_8px_rgba(220,161,29,0.25)]'
+                              : isPast
+                              ? 'w-6 sm:w-8 bg-[#DCA11D]/40 hover:bg-[#DCA11D]/70'
+                              : 'w-6 sm:w-8 bg-white/20 hover:bg-white/40'
+                          }`}
+                        >
+                          {/* Fill: raf-driven while current (no CSS transition
+                              so it can't fight the per-frame updates), but
+                              eases smoothly to full/empty the moment the slide
+                              hands off so a skipped slide still completes its
+                              sweep instead of just vanishing. */}
+                          <span
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E] rounded-full"
+                            style={{
+                              width: isCurrent ? `${slideProgress * 100}%` : isPast ? '100%' : '0%',
+                              transition: isCurrent ? 'none' : 'width 400ms cubic-bezier(0.16,1,0.3,1)',
+                            }}
                           />
-                          {isActive && (
-                            <span className="absolute inset-x-0 bottom-0 h-[2px] sm:h-[2.5px] bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]" />
-                          )}
-                        </span>
-                      </button>
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
 
-                {/* NEXT Text Button */}
+                {/* NEXT Button */}
                 <button
                   onClick={goNextSlide}
                   aria-label="Next slide"
-                  className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/80 hover:text-[#DCA11D] hover:bg-[#044D29]/40 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded transition-colors cursor-pointer"
+                  className="group flex items-center justify-center h-6 w-6 sm:h-7 sm:w-7 rounded-full text-white/70 hover:text-[#DCA11D] hover:bg-white/10 active:scale-90 transition-all duration-200 cursor-pointer"
                 >
-                  <span className="hidden xs:inline">Next</span>
-                  <ChevronRight className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#DCA11D]" />
+                  <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
 
-                {/* Numbered Counter with Parliament Accent */}
+                {/* Numbered Counter */}
                 <div
                   key={currentSlide}
-                  className="pl-2 sm:pl-3 ml-0.5 sm:ml-1 border-l border-white/15 text-right select-none animate-in fade-in duration-200"
+                  className="pl-2 sm:pl-2.5 ml-0.5 border-l border-white/15 text-right select-none animate-in fade-in zoom-in-95 duration-300 ease-out"
                 >
-                  <div className="font-mono leading-none text-white">
-                    <span className="text-sm sm:text-base md:text-lg font-black text-[#DCA11D] tabular-nums">
+                  <div className="font-mono leading-none">
+                    <span className="text-xs sm:text-sm font-black text-[#DCA11D] tabular-nums">
                       {String(currentSlide + 1).padStart(2, '0')}
                     </span>
                     <span className="text-[10px] sm:text-[11px] text-white/50 ml-0.5">
@@ -245,14 +246,6 @@ export default function HeroMinimal({
                     </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Real-time rAF Progress Bar Timeline in Signature Flag Gradient */}
-              <div className="h-[2px] sm:h-[3px] w-full bg-white/15 overflow-hidden rounded-full">
-                <div
-                  className="h-full bg-gradient-to-r from-[#044D29] via-[#DCA11D] to-[#C8102E]"
-                  style={{ width: `${slideProgress * 100}%`, transition: 'none' }}
-                />
               </div>
             </div>
           )}
